@@ -10,6 +10,7 @@
 - [Installation](#installation)
 - [License](#license)
 - [Usage](#usage)
+- [Additions](#additions)
 
 ## Installation
 
