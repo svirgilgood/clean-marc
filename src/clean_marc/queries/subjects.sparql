@@ -1,0 +1,89 @@
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX bflc: <http://id.loc.gov/ontologies/bflc/>
+PREFIX madsrdf: <http://www.loc.gov/mads/rdf/v1#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+##############################################################################################
+#
+# +-----------+-------------------------+--------+
+# | authLabel |controlledVocacbularies | labels |
+# +-----------+------------------------+---------+
+# |           |                        |         |
+# +-----------+------------------------+---------+
+#
+# This needs to be separated into the following columns: 
+#
+#+-----------+-------------------------+------------------+-------------------+------------------+-------------------+-----+------------------+-------------------+
+#| authLabel | controlledVocacbularies | component_type_1 | component_label_1 | component_type_2 | component_label_2 | ... | component_type_n | component_label_n |
+#+-----------+-------------------------+------------------+-------------------+------------------+-------------------+-----+------------------+-------------------+
+#|           |                         |                  |                   |                  |                   |     |                  |                   |
+#+-----------+-------------------------+------------------+-------------------+------------------+-------------------+-----+------------------+-------------------+
+#
+#
+#
+##############################################################################################
+SELECT
+  ?authLabel
+  (GROUP_CONCAT(DISTINCT str(?externalID); separator=";") AS ?externalIDs)
+  (GROUP_CONCAT(DISTINCT str(?lcID); separator=";") AS ?lcIDs)
+  (GROUP_CONCAT(DISTINCT str(?controlledVocabulary); separator=";") AS ?externalSources)
+  (GROUP_CONCAT(DISTINCT CONCAT(str(?type), "|", ?label); separator=";") AS ?_create_topics_hierarchy)
+WHERE {
+  {
+    {
+      SELECT ?topic ?authLabel ?label ?type (count(?mid)-1 as ?position )
+      WHERE {
+       VALUES ?displayLabel { 
+          rdfs:label 
+          madsrdf:authoritativeLabel
+        }
+        ?topic 
+          madsrdf:authoritativeLabel ?authLabel ;
+          madsrdf:componentList/rdf:rest* ?mid .
+          ?mid rdf:rest* ?node .
+          ?node rdf:first [ 
+            #madsrdf:authoritativeLabel ?label ; 
+            ?displayLabel ?label ;
+            rdf:type ?type
+          ] .
+      }
+      GROUP BY ?topic ?authLabel ?label ?type 
+      ORDER BY ?authLabel ?position
+    }
+    ?topic
+        bf:source ?controlledVocabulary ;
+    .
+    BIND(IF(STRSTARTS(str(?topic), "http://example.org"), "", str(?topic)) AS ?lcID)
+    #OPTIONAL {
+    #  ?topic madsrdf:isIdentifiedByAuthority ?externalID .
+    #}
+
+  } UNION {
+     ?s
+       bf:subject ?subject .
+     ?subject
+       bf:source ?controlledVocabulary ;
+       madsrdf:authoritativeLabel ?authLabel .
+     FILTER NOT EXISTS {
+       ?subject madsrdf:componentList ?list .
+     }
+    #OPTIONAL {
+    #   ?subject madsrdf:isIdentifiedByAuthority ?externalID .
+    # }
+     BIND(IF(STRSTARTS(str(?subject), "http://example.org"), str(?subject), "") AS ?lcID)
+ 
+ 
+   } UNION {
+    ?s 
+      bf:subject ?subject .
+    ?subject
+      rdf:type bf:Topic ;
+      madsrdf:authoritativeLabel ?authLabel ;
+      madsrdf:isIdentifiedByAuthority ?externalID ;
+      .
+  }
+}
+GROUP BY ?authLabel 
+ORDER BY DESC(?authLabel)

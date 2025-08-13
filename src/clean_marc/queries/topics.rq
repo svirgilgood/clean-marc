@@ -1,0 +1,111 @@
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX bflc: <http://id.loc.gov/ontologies/bflc/>
+PREFIX madsrdf: <http://www.loc.gov/mads/rdf/v1#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+
+SELECT 
+  ?label
+  (GROUP_CONCAT(DISTINCT ?type; separator=";") AS ?_simplify_types)
+  (GROUP_CONCAT(DISTINCT str(?scheme); separator=";") AS ?schemes)
+  (GROUP_CONCAT(DISTINCT str(?externalID); separator=";") AS ?extID)
+  (GROUP_CONCAT(DISTINCT str(?workSubjectOclc); separator="|") AS ?subjectFor)
+  (GROUP_CONCAT(DISTINCT str(?source); separator=";") AS ?sourceUris)
+WHERE {
+  {
+    ?work 
+      bf:subject ?topic ;
+    .
+
+    ?topic 
+      madsrdf:componentList/(rdf:rest*|rdf:first)* ?topicTerm ;
+    .
+    FILTER NOT EXISTS {
+      ?topicTerm 
+        a bf:Hub ;
+        .
+    }
+    OPTIONAL {
+      ?work 
+        bf:adminMetadata/bf:identifiedBy ?id ;
+      .
+      ?id 
+        rdf:value ?workSubjectOclc ;
+      .
+
+    }
+    OPTIONAL {
+      ?topic
+        madsrdf:isMemberOfMADSScheme ?scheme ;
+      .
+
+    }
+    OPTIONAL {
+      ?topic 
+        bf:source ?source ;
+        .
+    }
+    ?topicTerm 
+      madsrdf:authoritativeLabel ?label ;
+      rdf:type ?termType ;
+    .      
+    BIND(str(?termType) AS ?type)
+    BIND(IF(STRSTARTS(str(?topic), "http://example.org/") || isBlank(?topicTerm), "", ?topicTerm) AS ?externalID)
+  } UNION {
+    ?work 
+      bf:subject ?topic ;
+    .
+    OPTIONAL {
+      ?work 
+        bf:adminMetadata/bf:identifiedBy ?id ;
+      .
+      ?id 
+        rdf:value ?workSubjectOclc ;
+      .
+
+    }
+    FILTER NOT EXISTS {
+      ?topic 
+        madsrdf:componentList ?topicObj ;
+      .
+    }
+    FILTER NOT EXISTS {
+      ?topic
+        a bf:Hub ;
+      .
+    }
+    ?topic 
+      rdf:type ?termType ;
+      madsrdf:authoritativeLabel ?label ;
+    .
+    OPTIONAL {
+      ?topic 
+        bf:source ?source ;
+        .
+    }
+    OPTIONAL {
+      ?topic 
+        bf:source ?scheme ;
+      .
+    }
+    BIND(str(?termType) AS ?type)
+
+    BIND(IF(STRSTARTS(str(?topic), str("http://example.org/")) || isBlank(?topic), "", ?topic) AS ?externalID)
+  } #UNION {
+  # Excluding the `madsrdf:isIdentifiedByAuthority` because ithis data is usually used as the topic IRI.
+  # Or can be included as the topic IRI and grabbed from the other queries 
+  #?work
+  #    bf:subject ?topic ;
+  #  .
+  #  ?topic 
+  #    madsrdf:authoritativeLabel ?label ;
+  #    madsrdf:isIdentifiedByAuthority ?externalID ;
+  #  .
+
+  #}
+
+}
+GROUP BY ?label 
+ORDER BY ?label

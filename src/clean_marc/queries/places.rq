@@ -1,0 +1,65 @@
+PREFIX xs: <http://www.w3.org/2001/XMLSchema#>
+PREFIX cc: <http://creativecommons.org/ns#>
+PREFIX madsrdf: <http://www.loc.gov/mads/rdf/v1#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX bflc: <http://id.loc.gov/ontologies/bflc/>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+SELECT 
+  ?placeLabel 
+(GROUP_CONCAT(str(?place)) AS ?pps)
+(GROUP_CONCAT(DISTINCT str(?scheme); separator="; ") AS ?belongsToScheme)
+  (GROUP_CONCAT(DISTINCT str(?externalID); separator="; ") AS ?externalIDs)
+#(GROUP_CONCAT(str(); separator="; ") AS )
+WHERE {
+  {
+    VALUES ?labelPred {
+      madsrdf:authoritativeLabel
+      rdfs:label
+    }
+    ?place
+      a bf:Place ;
+      ?labelPred ?placeLabel ;
+      .
+      FILTER NOT EXISTS {
+        ?place madsrdf:isIdentifiedByAuthority ?externalID .
+      }
+      FILTER NOT EXISTS {
+        ?place madsrdf:isMemberOfMADSScheme ?scheme .
+      }
+  } UNION {
+    VALUES ?labelPred {
+      madsrdf:authoritativeLabel
+      rdfs:label
+    }
+
+    ?place 
+      a bf:Place ;
+      madsrdf:isMemberOfMADSScheme ?scheme ;
+      ?labelPred ?placeLabel ;
+      .
+  } UNION {
+    VALUES ?labelPred {
+      madsrdf:authoritativeLabel
+      rdfs:label
+    }
+ 
+    ?place 
+      a bf:Place ;
+      madsrdf:isIdentifiedByAuthority ?externalID ;
+      rdfs:label ?placeLabel ;
+    #  ?labelPred ?placeLabel ;
+     .
+      OPTIONAL {
+        ?place madsrdf:isMemberOfMADSScheme ?scheme .
+      }
+  }
+}
+GROUP BY ?placeLabel
+ORDER BY ?placeLabel  
+

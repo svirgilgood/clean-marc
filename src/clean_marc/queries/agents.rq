@@ -1,0 +1,97 @@
+PREFIX xs: <http://www.w3.org/2001/XMLSchema#>
+PREFIX cc: <http://creativecommons.org/ns#>
+PREFIX madsrdf: <http://www.loc.gov/mads/rdf/v1#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX bflc: <http://id.loc.gov/ontologies/bflc/>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+
+SELECT 
+#(sample(?agent) AS ?a)
+  ?agentLabel
+  (?agentLabel AS ?_extract_dates_from_names)
+  (GROUP_CONCAT(DISTINCT str(?agentType); separator="; ") AS ?types) 
+  (GROUP_CONCAT(DISTINCT str(?agentIds); separator=";") AS ?uris) 
+  (GROUP_CONCAT(DISTINCT str(?externalID); separator="; ") as ?externalIDs)
+#(GROUP_CONCAT(DISTINCT str(?marcKey); separator="; " ) as ?_split_agent_marc_string)
+  (GROUP_CONCAT(DISTINCT str(?workOclc); separator="|") AS ?contributionTo)
+  (GROUP_CONCAT(DISTINCT str(?workSubjectOclc); separator="|") AS ?subjectTo)
+WHERE {
+  {
+    ?agent a bf:Agent , ?agentType ;
+      rdfs:label ?agentLabel .
+    ?agentType rdfs:subClassOf bf:Agent . 
+    OPTIONAL {
+      ?work
+        bf:contribution/bf:agent ?agent ;
+        bf:adminMetadata ?id ;
+        .
+      ?id
+        bf:identifiedBy/rdf:value ?workOclc ;
+        .
+    }
+
+    OPTIONAL {
+      ?agent 
+        bflc:marcKey ?marcKey .
+    }
+    OPTIONAL {
+      ?work
+        bf:relation/bf:associatedResource/bf:contribution/bf:agent ?agent ;
+        bf:adminMetadata/bf:identifiedBy ?id ;
+        .
+      ?id
+        rdf:value ?workOclc ;
+        .
+    }
+    OPTIONAL {
+      ?work 
+        bf:subject/(madsrdf:componentList/rdf:first*)* ?agent ;
+        bf:adminMetadata/bf:identifiedBy ?id ;
+      .
+      ?id 
+        rdf:value ?workSubjectOclc ;
+      .
+    }
+    filter(!isBlank(?agent)) 
+    BIND(
+      IF(STRSTARTS(str(?agent), "http://example.org"), "", str(?agent)) AS ?agentIds
+    )
+    #filter(!STRSTARTS(str(?agent), "http://example.org"))
+  } UNION {
+    ?agent 
+      a bf:Agent ;
+      rdfs:label ?agentLabel ;
+      madsrdf:isIdentifiedByAuthority ?externalID .
+    #filter(!isBlank(?agent))
+    OPTIONAL {
+      ?agent 
+        bflc:marcKey ?marcKey .
+    }
+    OPTIONAL {
+      ?work
+        bf:relation/bf:associatedResource/bf:contribution/bf:agent ?agent ;
+        bf:adminMetadata/bf:identifiedBy ?id ;
+        .
+      ?id
+        rdf:value ?workOclc ;
+        .
+    }
+    OPTIONAL {
+      ?work 
+        bf:subject/(madsrdf:componentList/rdf:first*)* ?agent ;
+        #bf:subject ?agent ;
+        bf:adminMetadata/bf:identifiedBy ?id ;
+      .
+      ?id 
+        rdf:value ?workSubjectOclc ;
+      .
+    }
+  }
+}
+GROUP BY ?agentLabel

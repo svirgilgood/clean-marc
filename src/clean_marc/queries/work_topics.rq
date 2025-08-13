@@ -1,0 +1,104 @@
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX bflc: <http://id.loc.gov/ontologies/bflc/>
+PREFIX madsrdf: <http://www.loc.gov/mads/rdf/v1#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT
+(GROUP_CONCAT(DISTINCT str(?topic); separator=";") AS ?topicuri)
+(GROUP_CONCAT(DISTINCT str(?lcID); separator=";") AS ?externalIDs)
+(GROUP_CONCAT(DISTINCT str(?externalId); separator=";") AS ?additionalIDs)
+(GROUP_CONCAT(DISTINCT str(?type); separator=";") AS ?topicType)
+#?topic
+(SAMPLE(?label) AS ?ls)
+#  ?label
+?marcKey
+#?title
+(GROUP_CONCAT(DISTINCT ?title; separator=";") AS ?t)
+(GROUP_CONCAT(DISTINCT str(?titlePart); separator=";") AS ?part)
+(GROUP_CONCAT(DISTINCT str(?schema); separator=";") AS ?schemas)
+#?title
+  (GROUP_CONCAT(DISTINCT str(?relator); separator=";") AS ?rel)
+#?relator
+(GROUP_CONCAT(DISTINCT str(?contributor); separator=";") AS ?contributors)
+#?contributor
+  (GROUP_CONCAT(DISTINCT str(?contName); separator=";") AS ?connames)
+  (GROUP_CONCAT(DISTINCT str(?contribType); separator=";") AS ?conTypes)
+#?contName
+WHERE {
+
+  {
+    # For grabbing the information on a hub
+    # This is specifically for the Hub's that are related to subjects
+      ?work 
+        bf:subject/(madsrdf:collectionList/(rdf:rest*|rdf:first))* ?topic ;
+      .
+      VALUES ?type {
+        bf:Hub 
+      }
+      ?topic 
+        a ?type ;
+        bflc:marcKey ?marcKey ;
+        bf:title/bf:mainTitle ?title ;
+      .
+      OPTIONAL {
+        ?topic 
+          madsrdf:authoritativeLabel ?label ;
+        .
+      }
+      OPTIONAL {
+        ?topic 
+          madsrdf:isMemberOfMADSScheme ?schema ;
+        .
+      }
+      OPTIONAL {
+        ?topic 
+          madsrdf:isIdentifiedByAuthority ?externalId ;
+        .
+    }
+      FILTER NOT EXISTS {
+        ?topic bf:contribution ?contributionNode .
+      }
+      BIND(IF(STRSTARTS(str(?topic), "http://example.org") || isBlank(?topic), "", str(?topic)) AS ?lcID)
+  } UNION {
+    #VALUES ?labelPred {
+    #   madsrdf:authoritativeLabel 
+    #    rdfs:label
+    #  }
+      ?work 
+        bf:subject/(madsrdf:collectionList/(rdf:rest*|rdf:first))* ?topic ;
+      .
+      VALUES ?type {
+        bf:Hub 
+      }
+      ?topic 
+        a ?type ;
+        bflc:marcKey ?marcKey ;
+        bf:title/bf:mainTitle ?title ;
+        bf:contribution [
+          bf:agent ?contributor ;
+          bf:role ?relator ;
+        ] .
+      ?contributor 
+        rdf:type ?contribType ;
+        rdfs:label ?contName .
+      OPTIONAL {
+        ?topic
+          bf:title/(bf:partNumber|bf:partName) ?titlePart ;
+      }
+      OPTIONAL {
+        ?topic 
+          madsrdf:authoritativeLabel ?label ;
+        .
+      }
+      OPTIONAL {
+        ?topic 
+          madsrdf:isMemberOfMADSScheme ?schema ;
+        .
+      }
+      BIND(IF(STRSTARTS(str(?topic), "http://example.org") || isBlank(?topic), "", str(?topic)) AS ?lcID)
+    }  
+}
+GROUP BY ?marcKey
+ORDER BY ?marcKey

@@ -1,0 +1,126 @@
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX bflc: <http://id.loc.gov/ontologies/bflc/>
+PREFIX cc: <http://creativecommons.org/ns#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX madsrdf: <http://www.loc.gov/mads/rdf/v1#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX xs: <http://www.w3.org/2001/XMLSchema#>
+
+
+# 
+SELECT 
+  ?work
+  (GROUP_CONCAT(DISTINCT str(?title); separator="\n")  AS ?titles)
+  (GROUP_CONCAT(DISTINCT str(?oclcNumber); separator=";") AS ?oclcs)
+  (GROUP_CONCAT(DISTINCT str(?oclcNumber); separator=";") AS ?_add_uuid)
+  #("Mapping Chicago Land" AS ?collection)
+  #(GROUP_CONCAT(DISTINCT str(?item); separator=";") AS ?items)
+  #Holding istitution? 
+  (GROUP_CONCAT(DISTINCT str(?lang); separator=";") AS ?langs)
+#(GROUP_CONCAT(DISTINCT CONCAT(str(?shelfCode), str(?itemCode)); separator="|") AS ?callNumber)
+  (GROUP_CONCAT(DISTINCT str(?shelfCode); separator="|") AS ?shelfCodes)
+  (GROUP_CONCAT(DISTINCT str(?itemCode); separator="|") AS ?itemCodes)
+  (GROUP_CONCAT(DISTINCT str(?isbn); separator=";") AS ?_split_isbns)
+  (GROUP_CONCAT(DISTINCT str(?dim); separator=";") AS ?original_dimensions)
+  (GROUP_CONCAT(DISTINCT str(?pubPlace); separator=";") AS ?pubplaces)
+  (GROUP_CONCAT(DISTINCT str(?pubDate); separator=";") AS ?date)
+  (GROUP_CONCAT(DISTINCT str(?pubAgent); separator=";") AS ?publisher)
+  (GROUP_CONCAT(DISTINCT str(?contribution); separator=";") AS ?_create_contributions)
+  #(GROUP_CONCAT(DISTINCT ?))
+  
+
+WHERE {
+  {
+    ?work
+      a bf:Work ;
+      bf:hasInstance ?instance ;
+      bf:title/bf:mainTitle ?title ;
+          #bf:language ?lang ;
+      .
+    OPTIONAL {
+      ?work
+        bf:classification [
+              bf:classificationPortion ?shelfCode ;
+              bf:itemPortion ?itemCode ;
+              a bf:ClassificationLcc ;
+            ] ;
+        .
+
+    }
+
+    OPTIONAL {
+      ?work 
+        bf:language ?langNode ;
+        .
+      ?langNode
+        madsrdf:authoritativeLabel ?lang ;
+      .
+      Filter(langmatches(lang(?lang), "en"))
+    }
+
+    ?instance 
+      a bf:Instance ;
+      bf:identifiedBy [
+        a bf:OclcNumber ;
+        rdf:value ?oclcNumber ;
+      ] ;
+      .
+    OPTIONAL {
+      ?instance 
+        bf:provisionActivity [
+          bflc:simpleAgent ?pubAgent ;
+          bflc:simpleDate ?pubDate ;
+          bflc:simplePlace ?pubPlace ;
+        ] ;
+        .
+    }
+
+    OPTIONAL {
+      ?instance
+        bf:identifiedBy [
+          a bf:Isbn;
+          rdf:value ?isbn ;
+        ] ;
+      # bf:hasItem ?item ;
+      .
+    }
+    OPTIONAL {
+      ?instance 
+        bf:dimensions ?dim ;
+      .
+    }
+}
+    UNION { #both Jena and oxigraph would prefer this to be an optional and not a union. But rdflib expects this.
+    {
+    
+        SELECT ?work (CONCAT(str(?role), "|", REPLACE(?agent, ";", ",")) AS ?contribution)
+        WHERE {
+          ?work 
+            a bf:Work ;
+            bf:contribution ?contributionNode ;
+          .
+          ?contributionNode
+            bf:agent/rdfs:label ?agent ;
+            bf:role/(skos:prefLabel|rdfs:label) ?role ;
+          .
+          #VALUES ?roleLabel {
+          #  skos:prefLabel 
+          #  rdfs:label
+            #}
+          #?roleNode ?roleLabel ?role .
+
+            #OPTIONAL {
+          #?roleNode rdfs:label ?labeledRole .
+          #  FILTER(isBlank(?roleNode))
+          #}
+          #BIND(IF( BOUND(?labeledRole), ?labeledRole, str(?roleNode)) AS ?role)
+        }
+      }
+    }
+}
+GROUP BY ?work
+
