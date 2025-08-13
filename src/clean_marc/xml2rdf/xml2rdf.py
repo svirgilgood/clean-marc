@@ -6,11 +6,13 @@ from typing import Tuple, Union
 from lxml.etree import _Element, _ElementTree
 
 
-marc_t = Path(__file__).parent/"marc2bibframe2.xsl"
+xsl_dir = Path(__file__).parent/"marc2bibframe2"/"xsl"
+marc_t = xsl_dir/"marc2bibframe2.xsl"
 marc_xsl = ET.parse(marc_t)
 transform = ET.XSLT(marc_xsl)
 
-pre_process_t = Path(__file__).parent/"ConvSpec-Preprocess0-Splitting.xsl"
+# pre_process_t = Path(__file__).parent/"ConvSpec-Preprocess0-Splitting.xsl"
+pre_process_t = xsl_dir/"ConvSpec-Preprocess0-Splitting.xsl"
 pre_process_xsl = ET.parse(pre_process_t)
 work_trans = ET.XSLT(pre_process_xsl)
 
