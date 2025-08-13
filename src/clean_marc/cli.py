@@ -93,7 +93,7 @@ def cli():
         # action="store_true",
         nargs="?",
         help="""return marc record for oclc numbers. These must have a column
-        'OCLC number'. The OCLC number column is used to 
+        'OCLC number'. The OCLC number column is used to
         query the worldcat
         database""",
     )
@@ -108,8 +108,16 @@ def cli():
         "-q",
         "--query",
         nargs="?",
-        help="""Optionally select query or queries to run, not all of the queries
-        in the script""",
+        help="""Optionally select query or queries to run, not all of the
+        queries in the script""",
+    )
+    parser.add_argument(
+        "-d",
+        "--dir",
+        nargs="?",
+        help="""specify the directory to save the output files to, if no
+        argument is specified, the default current working directory will be
+        used"""
     )
     args = parser.parse_args()
 
@@ -120,12 +128,18 @@ def cli():
 
     marc_records = 0
 
+    if args.dir:
+        dir = Path(args.dir)
+        dir.mkdir(parents=True, exist_ok=True)
+    else:
+        dir = Path(".")
+
     if args.worldcat:
         worldcat_df = read_worldcat_items(args.worldcat)
         oclc_numbers = list(worldcat_df["OCLC number"])
         marc_tree = oclc.create_marc_collection(oclc_numbers=oclc_numbers)
         if args.save_xml:
-            with open(args.save_xml, "w") as fp:
+            with open(dir / args.save_xml, "w") as fp:
                 xmlstr = etree.tostring(marc_tree, pretty_print=True)
                 fp.write(xmlstr.decode())
         marc_records, graph = xml2rdf.marc2rdf(
@@ -144,7 +158,8 @@ def cli():
     print(f"Number of Marc Records: {marc_records}")
 
     if args.output:
-        graph.serialize(args.output, format="turtle")
+        print(dir / args.output)
+        graph.serialize(dir / args.output, format="turtle")
 
     # print("print graph", graph.serialize(format="turtle"))
     queries = collect_queries()
@@ -166,4 +181,4 @@ def cli():
             )
         )
         df = apply_functions(df, cleaning_functions, add_df=worldcat_df)
-        df.to_excel(f"{name}.xlsx", index=False)
+        df.to_excel(dir / f"{name}.xlsx", index=False)
