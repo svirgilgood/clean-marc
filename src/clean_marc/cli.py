@@ -13,13 +13,17 @@ from .oclc import oclc
 from .xml2rdf import xml2rdf
 from .queries.queries import collect_queries
 from .utils import cleaning_functions  # , cleaning_closures
+from .conversions.update_graph import update_graph
+from .reasoner.reasoner import instantiate_inferred_triples as reasoner
 
 
 # this is the bibframe model
 # Importing this allows ontology aware queries.
-bf_model = Path(__file__).parent / "model" / "bibframe.ttl"
-rel_model = Path(__file__).parent / "model" / "relators.skosrdf.ttl"
-lang_model = Path(__file__).parent / "model" / "languages.madsrdf.ttl"
+bf_model = Path(__file__).parent / "imported_model" / "bibframe.ttl"
+rel_model = Path(__file__).parent / "imported_model" / "relators.skosrdf.ttl"
+lang_model = Path(__file__).parent / "imported_model" / "languages.madsrdf.ttl"
+
+included_model = Path(__file__).parent / "included_model" / "clean_marc.ttl"
 
 
 def apply_functions(
@@ -119,12 +123,16 @@ def cli():
         argument is specified, the default current working directory will be
         used"""
     )
+    parser.add_argument(
+        "-i",
+        "--skip-inference",
+        action="store_true",
+        help="""skip the inferencing step. Inferencing can take some time, this
+        skips the inferencing step"""
+    )
     args = parser.parse_args()
 
     graph = Graph()
-    graph.parse(bf_model)
-    graph.parse(rel_model)
-    graph.parse(lang_model)
 
     marc_records = 0
 
@@ -156,6 +164,19 @@ def cli():
         marc_records = marc_records + m_records
 
     print(f"Number of Marc Records: {marc_records}")
+
+    graph.parse(included_model)
+    # scripts for updating the graph
+    graph = update_graph(graph)
+
+    # run inferencing
+    if not args.skip_inference:
+        graph = reasoner(graph)
+
+    # Import the models for context aware queries
+    graph.parse(bf_model)
+    graph.parse(rel_model)
+    graph.parse(lang_model)
 
     if args.output:
         print(dir / args.output)

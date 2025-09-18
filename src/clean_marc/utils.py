@@ -7,7 +7,8 @@ from .marc.marc import (
     ONEHUNDREDTEN_CODES,
     SIXHUNDRED_CODES,
     SIXHUNDERDTEN_CODES,
-    # EIGHTHUNDREDTEN_CODES,
+    EIGHTHUNDRED_CODES,
+    EIGHTHUNDREDTEN_CODES,
     SEVENHUNDREDTEN_CODES,
     SEVENHUNDRED_CODES,
 )
@@ -224,6 +225,13 @@ def return_uuid(series: pd.Series, add_df=Union[None, pd.DataFrame], **kwargs) -
     if add_df is None:
         return series
     oclc_number = series["_add_uuid"]
+    if type(oclc_number) is int and oclc_number > 0:
+        oclc_number = str(oclc_number)
+
+    elif type(oclc_number) is not str:
+        return series
+    else:
+        pass
     try:
         oclcs = oclc_number.split(";")
         uuids = []
@@ -259,6 +267,7 @@ def split_agent_marc_string(series: pd.Series, **kwargs) -> pd.Series:
         marc = marc.strip()
         # print(f"marc code '{marc}'")
         field = marc[:3]
+        series_additions.setdefault("00 - Field", set()).add(field)
         match field:
             case "100": value_dict = ONEHUNDRED_CODES
             case "110": value_dict = ONEHUNDREDTEN_CODES
@@ -266,6 +275,8 @@ def split_agent_marc_string(series: pd.Series, **kwargs) -> pd.Series:
             case "610": value_dict = SIXHUNDERDTEN_CODES
             case "700": value_dict = SEVENHUNDRED_CODES
             case "710": value_dict = SEVENHUNDREDTEN_CODES
+            case "800": value_dict = EIGHTHUNDRED_CODES
+            case "810": value_dict = EIGHTHUNDREDTEN_CODES
             case _:
                 print(f"\033[31mField not found!!! {field}!\033[0m")
                 print(f"marc code '{marc}'")
@@ -274,13 +285,22 @@ def split_agent_marc_string(series: pd.Series, **kwargs) -> pd.Series:
         try:
             first_indicator = marc[3]
             if first_indicator != "" and first_indicator != " ":
-                indicator_value = value_dict["first-indicator"][first_indicator]
+                indicator_value = value_dict["first-indicator"].get(
+                    first_indicator)
+                if type(indicator_value) is dict:
+                    indicator_value = indicator_value["value"]
+                if not indicator_value:
+                    indicator_value = f"{first_indicator}: not found"
                 series_additions.setdefault(
                     "1 - Indicator", set()).add(indicator_value)
             second_indicator = marc[4]
             # and first_indicator != " ":
             if second_indicator not in ("", " ", "$"):
-                indicator_value = value_dict["second-indicator"][second_indicator]
+                indicator_value = value_dict["second-indicator"].get(
+                    second_indicator)
+
+                if not indicator_value:
+                    indicator_value = f"{first_indicator}: not found"
                 series_additions.setdefault(
                     "2 - Indicator", set()).add(indicator_value)
 
@@ -288,7 +308,7 @@ def split_agent_marc_string(series: pd.Series, **kwargs) -> pd.Series:
                 if subfield == "":
                     continue
                 subfield_code = subfield[0]
-                subfield_key = value_dict["subfield-codes"][subfield_code]
+                subfield_key = value_dict["subfield-codes"][subfield_code]["value"]
                 series_additions.setdefault(
                     f"{subfield_code} - {subfield_key}", set()).add(subfield[1:])
         except KeyError as e:
@@ -327,7 +347,7 @@ def simplify_types(series: pd.Series, **kwargs) -> pd.Series:
                   '; '.join(term_types)}\033[0m")
         term_type = "Topic"
 
-    series["Type"] = term_type
+    series["types"] = term_type
 
     return series
 

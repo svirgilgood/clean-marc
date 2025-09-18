@@ -1,0 +1,289 @@
+@prefix bf: <http://id.loc.gov/ontologies/bibframe/> .
+@prefix bflc: <http://id.loc.gov/ontologies/bflc/> .
+@prefix cc: <http://creativecommons.org/ns#> .
+@prefix cmd: <http://svirgilgood.github.io/clean_marc/data/> .
+@prefix cmo: <http://svirgilgood.github.io/clean_marc/onto/> .
+@prefix cmt: <http://svirgilgood.github.io/clean_marc/taxonomy/> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix dma: <http://lib.uchicago.edu/dma/> .
+@prefix edm: <http://www.europeana.eu/schemas/edm/> .
+@prefix erc: <https://www.dublincore.org/groups/kernel/spec/> .
+@prefix fn: <http://www.w3.org/2005/xpath-functions> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix icu: <http://lib.uchicago.edu/icu/> .
+@prefix lexvo: <https://www.iso.org/standard/39534.html> .
+@prefix madsrdf: <http://www.loc.gov/mads/rdf/v1#> .
+@prefix ore: <http://www.openarchives.org/ore/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rel: <http://id.loc.gov/vocabulary/relators/> .
+@prefix ri: <http://id.loc.gov/ontologies/RecordInfo#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix skosxl: <http://www.w3.org/2008/05/skos-xl#> .
+@prefix uchicago: <http://lib.uchicago.edu/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cmo:Agent
+  a owl:Class ;
+  skos:prefLabel "Agent" ;
+  .
+
+cmo:Category
+  a owl:Class ;
+  skos:prefLabel "Category" ;
+  .
+
+cmo:MarcField
+  a owl:Class ;
+  skos:prefLabel "Marc Field" ;
+  skos:definition "A collection of the parts that make up a marc field" ;
+  .
+
+cmo:ManuscriptResource
+  a owl:Class ;
+  owl:equivalentClass [
+    a owl:Class ;
+    owl:intersectionOf (
+      [
+        a owl:Restriction ;
+        owl:onProperty cmo:hasMarcField ;
+        owl:someValuesFrom cmo:ManuscriptField ;
+      ]
+    ) ;
+  ] ;
+  skos:prefLabel "Manuscript Resource" ;
+  .
+
+cmo:ManuscriptField
+  a owl:Class ;
+  owl:equivalentClass [
+    a owl:Class ;
+    owl:intersectionOf (
+      cmo:MarcField
+      [
+        a owl:Restriction ;
+        owl:onProperty cmo:hasPart ;
+        owl:someValuesFrom [
+          a owl:Class ;
+          owl:intersectionOf (
+            cmo:SubField
+            [
+              a owl:Restriction ;
+              owl:onProperty cmo:hasCategory ;
+              owl:hasValue cmt:_SFCat_Part ;
+            ]
+          )
+        ] ;
+      ]
+      [
+        a owl:Restriction ;
+        owl:onProperty cmo:hasPart ;
+        owl:someValuesFrom [
+          a owl:Class ;
+          owl:intersectionOf (
+            cmo:SubField
+            [
+              a owl:Class ;
+              owl:unionOf (
+                [
+                  a owl:Restriction ;
+                  owl:onProperty cmo:hasCategory ;
+                  owl:hasValue cmt:_SFCat_Subtitle ;
+                ]
+                [
+                  a owl:Restriction ;
+                  owl:onProperty cmo:hasCategory ;
+                  owl:hasValue cmt:_SFCat_Language
+                ]
+              )
+            ]
+          )
+        ]
+      ]
+    ) ;
+  ] ;
+  skos:prefLabel "Manuscript Reference" ;
+  .
+
+cmo:MarcField
+  a owl:Class ;
+  skos:prefLabel "Marc Field" ;
+  .
+
+cmo:NameType
+  rdfs:subClassOf cmo:Category ;
+  skos:prefLabel "Name Type" ;
+  .
+
+cmo:Organization
+  rdfs:subClassOf cmo:Agent ;
+  skos:prefLabel "Organization" ;
+  .
+
+cmo:Person
+  rdfs:subClassOf cmo:Agent ;
+  skos:prefLabel "Person" ;
+  .
+
+cmo:SubField
+  a owl:Class ;
+  skos:prefLabel "Marc Subfield" ;
+  .
+
+cmo:SubfieldCategory
+  rdfs:subClassOf cmo:Category ;
+  skos:prefLabel "Subfield Category" ;
+  .
+
+cmo:fieldNumber
+  a owl:DatatypeProperty ;
+  skos:prefLabel "field number" ;
+  .
+
+cmo:firstIndicator
+  a owl:DatatypeProperty ;
+  skos:prefLabel "first indicator" ;
+  .
+
+cmo:hasCategory
+  a owl:ObjectProperty ;
+  skos:prefLabel "has category" ;
+  .
+
+cmo:hasCode
+  a owl:DatatypeProperty ;
+  skos:prefLabel "has code" ;
+  .
+
+cmo:hasEntry
+  a owl:DatatypeProperty ;
+  skos:prefLabel "has entry" ;
+  .
+
+cmo:hasMarcField
+  a owl:ObjectProperty ;
+  skos:prefLabel "has marc field" ;
+  .
+
+cmo:hasPart
+  a owl:ObjectProperty ;
+  skos:prefLabel "has part" ;
+  .
+
+cmo:hasValue
+  a owl:DatatypeProperty ;
+  skos:prefLabel "has value" ;
+  .
+
+cmo:secondIndicator
+  a owl:DatatypeProperty ;
+  skos:prefLabel "second indicator" ;
+  .
+
+cmt:_SFCat_AgentDate
+  a cmo:SubfieldCategory ;
+  skos:prefLabel "Agent Date" ;
+  .
+
+cmt:_SFCat_AltName
+  a cmo:SubfieldCategory ;
+  skos:prefLabel "Alternative Name" ;
+  .
+
+cmt:_SFCat_Appelation
+  a cmo:SubfieldCategory ;
+  skos:prefLabel "Appelation" ;
+  .
+
+cmt:_SFCat_ExternalID
+  a cmo:SubfieldCategory ;
+  skos:prefLabel "External ID" ;
+  .
+
+cmt:_SFCat_Language
+  a cmo:SubfieldCategory ;
+  skos:prefLabel "Language" ;
+  .
+
+cmt:_SFCat_Location
+  a cmo:SubfieldCategory ;
+  skos:prefLabel "Location" ;
+  .
+
+cmt:_SFCat_MiscInfo
+  a cmo:SubfieldCategory ;
+  skos:prefLabel "Miscellaneous Information" ;
+  .
+
+cmt:_SFCat_Name
+  a cmo:SubfieldCategory ;
+  skos:prefLabel "Name" ;
+  .
+
+cmt:_SFCat_Part
+  a cmo:SubfieldCategory ;
+  skos:prefLabel "Part" ;
+  .
+
+cmt:_SFCat_Relator
+  a cmo:SubfieldCategory ;
+  skos:prefLabel "Relator" ;
+  .
+
+cmt:_SFCat_SubordinateUnit
+  a cmo:SubfieldCategory ;
+  skos:prefLabel "Subordinate Unit" ;
+  .
+
+cmt:_SFCat_Subtitle
+  a cmo:SubfieldCategory ;
+  skos:prefLabel "Subtitle" ;
+  .
+
+cmt:_SFCat_Title
+  a cmo:SubfieldCategory ;
+  skos:prefLabel "Title" ;
+  .
+
+cmt:_SFCat_WorkDate
+  a cmo:SubfieldCategory ;
+  skos:prefLabel "Work Date" ;
+  .
+
+### Example
+<http://svirgilgood.github.io/clean_marc/data/_Agent_00931b03f80a0406a2>
+    <http://svirgilgood.github.io/clean_marc/onto/hasMarcField>  cmd:_MarcField_00001232 ;
+    a <http://svirgilgood.github.io/clean_marc/onto/Agent>, <http://svirgilgood.github.io/clean_marc/onto/Organization>, <http://www.w3.org/2002/07/owl#Thing> ;
+    <http://www.w3.org/2000/01/rdf-schema#label> "Stiftsbibliothek Sankt Gallen Manuscript 382" ;
+    <http://www.w3.org/2000/01/rdf-schema#seeAlso> <http://example.org/12734784#Agent710-29>, <http://example.org/1447246#Agent710-31> .
+
+
+cmd:_MarcField_00001232
+        <http://svirgilgood.github.io/clean_marc/onto/fieldNumber> "710" ;
+        <http://svirgilgood.github.io/clean_marc/onto/firstIndicator> "2" ;
+        <http://svirgilgood.github.io/clean_marc/onto/hasPart> [
+            <http://svirgilgood.github.io/clean_marc/onto/hasCategory> <http://svirgilgood.github.io/clean_marc/taxonomy/_SFCat_Name> ;
+            <http://svirgilgood.github.io/clean_marc/onto/hasCode> "a" ;
+            <http://svirgilgood.github.io/clean_marc/onto/hasEntry> "Corporate name or jurisdiction name as entry element (NR)" ;
+            <http://svirgilgood.github.io/clean_marc/onto/hasValue> "Stiftsbibliothek Sankt Gallen" ;
+            a <http://svirgilgood.github.io/clean_marc/onto/SubField>, <http://www.w3.org/2002/07/owl#Thing>
+        ], [
+            <http://svirgilgood.github.io/clean_marc/onto/hasCategory> <http://svirgilgood.github.io/clean_marc/taxonomy/_SFCat_Part> ;
+            <http://svirgilgood.github.io/clean_marc/onto/hasCode> "n" ;
+            <http://svirgilgood.github.io/clean_marc/onto/hasEntry> "Number of part/section/meeting (R)" ;
+            <http://svirgilgood.github.io/clean_marc/onto/hasValue> "382" ;
+            a <http://svirgilgood.github.io/clean_marc/onto/SubField>, <http://www.w3.org/2002/07/owl#Thing>
+        ], [
+            <http://svirgilgood.github.io/clean_marc/onto/hasCategory> <http://svirgilgood.github.io/clean_marc/taxonomy/_SFCat_Subtitle> ;
+            <http://svirgilgood.github.io/clean_marc/onto/hasCode> "k" ;
+            <http://svirgilgood.github.io/clean_marc/onto/hasEntry> "Form subheading (R)" ;
+            <http://svirgilgood.github.io/clean_marc/onto/hasValue> "Manuscript" ;
+            a <http://svirgilgood.github.io/clean_marc/onto/SubField>, <http://www.w3.org/2002/07/owl#Thing>
+        ] ;
+        <http://svirgilgood.github.io/clean_marc/onto/secondIndicator> " " ;
+        a <http://svirgilgood.github.io/clean_marc/onto/MarcField>, <http://www.w3.org/2002/07/owl#Thing> ;
+        rdf:value "7102 $aStiftsbibliothek Sankt Gallen$kManuscript$n382" ;
+  .
+

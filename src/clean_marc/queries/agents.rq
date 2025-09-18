@@ -11,21 +11,23 @@ PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
 
 
-SELECT 
+SELECT
 #(sample(?agent) AS ?a)
   ?agentLabel
   (?agentLabel AS ?_extract_dates_from_names)
-  (GROUP_CONCAT(DISTINCT str(?agentType); separator="; ") AS ?types) 
-  (GROUP_CONCAT(DISTINCT str(?agentIds); separator=";") AS ?uris) 
+  (GROUP_CONCAT(DISTINCT str(?agentType); separator="; ") AS ?types)
+  (GROUP_CONCAT(DISTINCT str(?agentType); separator="; ") AS ?_simplify_types)
+  (GROUP_CONCAT(DISTINCT str(?agentIds); separator=";") AS ?uris)
   (GROUP_CONCAT(DISTINCT str(?externalID); separator="; ") as ?externalIDs)
-#(GROUP_CONCAT(DISTINCT str(?marcKey); separator="; " ) as ?_split_agent_marc_string)
+  (GROUP_CONCAT(DISTINCT str(?marcKey); separator="; " ) as ?_split_agent_marc_string)
+  (GROUP_CONCAT(DISTINCT str(?marcKey); separator="; " ) as ?markKeys)
   (GROUP_CONCAT(DISTINCT str(?workOclc); separator="|") AS ?contributionTo)
   (GROUP_CONCAT(DISTINCT str(?workSubjectOclc); separator="|") AS ?subjectTo)
 WHERE {
   {
     ?agent a bf:Agent , ?agentType ;
       rdfs:label ?agentLabel .
-    ?agentType rdfs:subClassOf bf:Agent . 
+    ?agentType rdfs:subClassOf bf:Agent .
     OPTIONAL {
       ?work
         bf:contribution/bf:agent ?agent ;
@@ -37,7 +39,7 @@ WHERE {
     }
 
     OPTIONAL {
-      ?agent 
+      ?agent
         bflc:marcKey ?marcKey .
     }
     OPTIONAL {
@@ -50,27 +52,27 @@ WHERE {
         .
     }
     OPTIONAL {
-      ?work 
+      ?work
         bf:subject/(madsrdf:componentList/rdf:first*)* ?agent ;
         bf:adminMetadata/bf:identifiedBy ?id ;
       .
-      ?id 
+      ?id
         rdf:value ?workSubjectOclc ;
       .
     }
-    filter(!isBlank(?agent)) 
+    FILTER(!isBlank(?agent))
     BIND(
       IF(STRSTARTS(str(?agent), "http://example.org"), "", str(?agent)) AS ?agentIds
     )
     #filter(!STRSTARTS(str(?agent), "http://example.org"))
   } UNION {
-    ?agent 
+    ?agent
       a bf:Agent ;
       rdfs:label ?agentLabel ;
       madsrdf:isIdentifiedByAuthority ?externalID .
     #filter(!isBlank(?agent))
     OPTIONAL {
-      ?agent 
+      ?agent
         bflc:marcKey ?marcKey .
     }
     OPTIONAL {
@@ -83,12 +85,12 @@ WHERE {
         .
     }
     OPTIONAL {
-      ?work 
+      ?work
         bf:subject/(madsrdf:componentList/rdf:first*)* ?agent ;
         #bf:subject ?agent ;
         bf:adminMetadata/bf:identifiedBy ?id ;
       .
-      ?id 
+      ?id
         rdf:value ?workSubjectOclc ;
       .
     }

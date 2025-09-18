@@ -1,0 +1,99 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix cc: <http://creativecommons.org/ns#> .
+@prefix ri: <http://id.loc.gov/ontologies/RecordInfo#> .
+@prefix bflc: <http://id.loc.gov/ontologies/bflc/> .
+@prefix bf: <http://id.loc.gov/ontologies/bibframe/> .
+@prefix rel: <http://id.loc.gov/vocabulary/relators/> .
+@prefix uchicago: <http://lib.uchicago.edu/> .
+@prefix dma: <http://lib.uchicago.edu/dma/> .
+@prefix icu: <http://lib.uchicago.edu/icu/> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix cmd: <http://svirgilgood.github.io/clean_marc/data/> .
+@prefix cmo: <http://svirgilgood.github.io/clean_marc/onto/> .
+@prefix cmt: <http://svirgilgood.github.io/clean_marc/taxonomy/> .
+@prefix edm: <http://www.europeana.eu/schemas/edm/> .
+@prefix madsrdf: <http://www.loc.gov/mads/rdf/v1#> .
+@prefix ore: <http://www.openarchives.org/ore/terms/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix fn: <http://www.w3.org/2005/xpath-functions> .
+@prefix skosxl: <http://www.w3.org/2008/05/skos-xl#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix erc: <https://www.dublincore.org/groups/kernel/spec/> .
+@prefix lexvo: <https://www.iso.org/standard/39534.html> .
+
+cmd:_Agent_126f95dbf6ed476a22
+    cmo:hasMarcField _:a1dc8a012c8b7c302662844403aa9bcf, _:ade585218ac499e47660abec3dc8b441 ;
+    a cmo:Agent, cmo:Organization, rdfs:Resource, owl:Thing ;
+    rdfs:label "Klášterní knihovna (Vyšší Brod) Manuscript 1 VB XXXIV" ;
+    rdfs:seeAlso <http://example.org/8550662#Agent610-56>, <http://example.org/8550662#Agent710-64> ;
+    owl:sameAs cmd:_Agent_126f95dbf6ed476a22 .
+
+_:a1dc8a012c8b7c302662844403aa9bcf
+    cmo:fieldNumber "710" ;
+    cmo:firstIndicator "2" ;
+    cmo:hasPart _:a2af1d9473cbc07d1d48d722e1968b86, _:d66e38115d0bfda03a2ad3320c32d450, _:fda69caec6f14628a2b86cdca2382454 ;
+    cmo:secondIndicator "2" ;
+    a cmo:MarcField, rdfs:Resource, owl:Thing ;
+    rdf:value "71022$aKlášterní knihovna (Vyšší Brod)$kManuscript$n1 VB XXXIV" ;
+    owl:sameAs _:a1dc8a012c8b7c302662844403aa9bcf .
+
+_:a2af1d9473cbc07d1d48d722e1968b86
+    cmo:hasCategory cmt:_SFCat_Part ;
+    cmo:hasCode "n" ;
+    cmo:hasEntry "Number of part/section/meeting (R)" ;
+    cmo:hasValue "1 VB XXXIV" ;
+    a cmo:SubField, rdfs:Resource, owl:Thing ;
+    owl:sameAs _:a2af1d9473cbc07d1d48d722e1968b86 .
+
+_:ade585218ac499e47660abec3dc8b441
+    cmo:fieldNumber "610" ;
+    cmo:firstIndicator "2" ;
+    cmo:hasPart _:cf474641f449147d836351bd5fecc04c, _:d9813aed6e75159d553eb6dca885d0de, _:fa878003fd29bf203562a92fc5e363a0 ;
+    cmo:secondIndicator "0" ;
+    a cmo:MarcField, rdfs:Resource, owl:Thing ;
+    rdf:value "61020$aKlášterní knihovna (Vyšší Brod)$kManuscript$n1 VB XXXIV" ;
+    owl:sameAs _:ade585218ac499e47660abec3dc8b441 .
+
+_:cf474641f449147d836351bd5fecc04c
+    cmo:hasCategory cmt:_SFCat_Name ;
+    cmo:hasCode "a" ;
+    cmo:hasEntry "Corporate name or jurisdiction name as entry element (NR)" ;
+    cmo:hasValue "Klášterní knihovna (Vyšší Brod)" ;
+    a cmo:SubField, rdfs:Resource, owl:Thing ;
+    owl:sameAs _:cf474641f449147d836351bd5fecc04c .
+
+_:d66e38115d0bfda03a2ad3320c32d450
+    cmo:hasCategory cmt:_SFCat_Name ;
+    cmo:hasCode "a" ;
+    cmo:hasEntry "Corporate name or jurisdiction name as entry element (NR)" ;
+    cmo:hasValue "Klášterní knihovna (Vyšší Brod)" ;
+    a cmo:SubField, rdfs:Resource, owl:Thing ;
+    owl:sameAs _:d66e38115d0bfda03a2ad3320c32d450 .
+
+_:d9813aed6e75159d553eb6dca885d0de
+    cmo:hasCategory cmt:_SFCat_Subtitle ;
+    cmo:hasCode "k" ;
+    cmo:hasEntry "Form subheading (R)" ;
+    cmo:hasValue "Manuscript" ;
+    a cmo:SubField, rdfs:Resource, owl:Thing ;
+    owl:sameAs _:d9813aed6e75159d553eb6dca885d0de .
+
+_:fa878003fd29bf203562a92fc5e363a0
+    cmo:hasCategory cmt:_SFCat_Part ;
+    cmo:hasCode "n" ;
+    cmo:hasEntry "Number of part / section/meeting(R)" ;
+    cmo:hasValue "1 VB XXXIV" ;
+    a cmo:SubField, rdfs:Resource, owl:Thing ;
+    owl:sameAs _:fa878003fd29bf203562a92fc5e363a0 .
+
+_:fda69caec6f14628a2b86cdca2382454
+    cmo:hasCategory cmt:_SFCat_Subtitle ;
+    cmo:hasCode "k" ;
+    cmo:hasEntry "Form subheading (R)" ;
+    cmo:hasValue "Manuscript" ;
+    a cmo:SubField, rdfs:Resource, owl:Thing ;
+    owl:sameAs _:fda69caec6f14628a2b86cdca2382454 .

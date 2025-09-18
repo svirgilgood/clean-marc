@@ -1,32 +1,14 @@
-from .marc_data import (
-    ONEHUNDRED_CODES,
-    ONEHUNDREDTEN_CODES,
-    SIXHUNDRED_CODES,
-    SIXHUNDERDTEN_CODES,
-    EIGHTHUNDRED_CODES,
-    EIGHTHUNDREDTEN_CODES,
-    SEVENHUNDREDTEN_CODES,
-    SEVENHUNDRED_CODES,
-)
-from typing import Dict, Set
+"""
 
-ONEHUNDRED_CODES = ONEHUNDRED_CODES
-ONEHUNDREDTEN_CODES = ONEHUNDREDTEN_CODES
-SIXHUNDRED_CODES = SIXHUNDRED_CODES
-SIXHUNDERDTEN_CODES = SIXHUNDERDTEN_CODES
-EIGHTHUNDRED_CODES = EIGHTHUNDRED_CODES
-EIGHTHUNDREDTEN_CODES = EIGHTHUNDREDTEN_CODES
-SEVENHUNDREDTEN_CODES = SEVENHUNDREDTEN_CODES
-SEVENHUNDRED_CODES = SEVENHUNDRED_CODES
+"""
+from typing import Dict
 
 
-def decompose_marc_string(
-        marc: str,
-        series_additions: Dict[str, Set[str]]
-) -> Dict[str, Set[str]]:
+def decompose_marc_string(marc: str) -> Dict[str, str]:
     """
     A function for cleaning the marc keys that are
     """
+    series_additions = {}
     marc = marc.strip()
     # print(f"marc code '{marc}'")
     field = marc[:3]
@@ -43,7 +25,7 @@ def decompose_marc_string(
         case _:
             print(f"\033[31mField not found!!! {field}!\033[0m")
             print(f"marc code '{marc}'")
-            return series_additions
+            continue
 
     try:
         first_indicator = marc[3]
@@ -76,3 +58,15 @@ def decompose_marc_string(
         print(f"\033[93mKey Error for {marc}\033[0m\n {e}")
 
     return series_additions
+
+
+# class MarcField
+"""
+    I think It wwould be good to have a proper class definition
+    """
+
+
+class SevenHundredTen:
+    def __init__(self, marc_key):
+        """
+        """

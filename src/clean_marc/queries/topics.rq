@@ -6,7 +6,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
 
-SELECT 
+SELECT
   ?label
   (GROUP_CONCAT(DISTINCT ?type; separator=";") AS ?_simplify_types)
   (GROUP_CONCAT(DISTINCT str(?scheme); separator=";") AS ?schemes)
@@ -15,23 +15,23 @@ SELECT
   (GROUP_CONCAT(DISTINCT str(?source); separator=";") AS ?sourceUris)
 WHERE {
   {
-    ?work 
+    ?work
       bf:subject ?topic ;
     .
 
-    ?topic 
+    ?topic
       madsrdf:componentList/(rdf:rest*|rdf:first)* ?topicTerm ;
     .
     FILTER NOT EXISTS {
-      ?topicTerm 
+      ?topicTerm
         a bf:Hub ;
         .
     }
     OPTIONAL {
-      ?work 
+      ?work
         bf:adminMetadata/bf:identifiedBy ?id ;
       .
-      ?id 
+      ?id
         rdf:value ?workSubjectOclc ;
       .
 
@@ -43,31 +43,31 @@ WHERE {
 
     }
     OPTIONAL {
-      ?topic 
+      ?topic
         bf:source ?source ;
         .
     }
-    ?topicTerm 
+    ?topicTerm
       madsrdf:authoritativeLabel ?label ;
       rdf:type ?termType ;
-    .      
+    .
     BIND(str(?termType) AS ?type)
     BIND(IF(STRSTARTS(str(?topic), "http://example.org/") || isBlank(?topicTerm), "", ?topicTerm) AS ?externalID)
   } UNION {
-    ?work 
+    ?work
       bf:subject ?topic ;
     .
     OPTIONAL {
-      ?work 
+      ?work
         bf:adminMetadata/bf:identifiedBy ?id ;
       .
-      ?id 
+      ?id
         rdf:value ?workSubjectOclc ;
       .
 
     }
     FILTER NOT EXISTS {
-      ?topic 
+      ?topic
         madsrdf:componentList ?topicObj ;
       .
     }
@@ -76,17 +76,17 @@ WHERE {
         a bf:Hub ;
       .
     }
-    ?topic 
+    ?topic
       rdf:type ?termType ;
       madsrdf:authoritativeLabel ?label ;
     .
     OPTIONAL {
-      ?topic 
+      ?topic
         bf:source ?source ;
         .
     }
     OPTIONAL {
-      ?topic 
+      ?topic
         bf:source ?scheme ;
       .
     }
@@ -95,11 +95,11 @@ WHERE {
     BIND(IF(STRSTARTS(str(?topic), str("http://example.org/")) || isBlank(?topic), "", ?topic) AS ?externalID)
   } #UNION {
   # Excluding the `madsrdf:isIdentifiedByAuthority` because ithis data is usually used as the topic IRI.
-  # Or can be included as the topic IRI and grabbed from the other queries 
+  # Or can be included as the topic IRI and grabbed from the other queries
   #?work
   #    bf:subject ?topic ;
   #  .
-  #  ?topic 
+  #  ?topic
   #    madsrdf:authoritativeLabel ?label ;
   #    madsrdf:isIdentifiedByAuthority ?externalID ;
   #  .
@@ -107,5 +107,5 @@ WHERE {
   #}
 
 }
-GROUP BY ?label 
+GROUP BY ?label
 ORDER BY ?label
