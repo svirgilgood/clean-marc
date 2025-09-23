@@ -13,7 +13,7 @@ from .oclc import oclc
 from .xml2rdf import xml2rdf
 from .queries.queries import collect_queries
 from .utils import cleaning_functions  # , cleaning_closures
-from .conversions.update_graph import update_graph
+from .conversions.update_graph import pre_reasoner_scripts, post_reasoner_scripts
 from .reasoner.reasoner import instantiate_inferred_triples as reasoner
 
 
@@ -130,6 +130,7 @@ def cli():
         help="""skip the inferencing step. Inferencing can take some time, this
         skips the inferencing step"""
     )
+
     args = parser.parse_args()
 
     graph = Graph()
@@ -163,15 +164,22 @@ def cli():
             marc_tree, graph, separate_works=False)
         marc_records = marc_records + m_records
 
+    if args.save_xml:
+        with open(dir / args.save_xml, "w") as fp:
+            xmlstr = etree.tostring(marc_tree, pretty_print=True)
+            fp.write(xmlstr.decode())
+
     print(f"Number of Marc Records: {marc_records}")
 
     graph.parse(included_model)
     # scripts for updating the graph
-    graph = update_graph(graph)
+    graph = pre_reasoner_scripts(graph)
 
     # run inferencing
     if not args.skip_inference:
         graph = reasoner(graph)
+
+    graph = post_reasoner_scripts(graph)
 
     # Import the models for context aware queries
     graph.parse(bf_model)

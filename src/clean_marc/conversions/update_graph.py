@@ -129,16 +129,33 @@ def clean_agents(graph: Graph) -> Graph:
     return graph + agent_graph
 
 
-def update_graph(graph: Graph) -> Graph:
-    # pre clean up queries
-    # these queries should be run before the clean up scripts
-    for sparql_update in (update_dir/"pre").glob("*.ru"):
-        graph.query(sparql_update)
+def run_clean_scripts(dire: str, graph: Graph) -> Graph:
+    """
+    These update queries and functions are intended to be run
+    before the reasoner
+    """
+    for sparql_update in (update_dir/dire).glob("*.ru"):
+        with open(sparql_update, "r") as qfp:
+            update_query = qfp.read()
+            print("\nCLEAN UP SCRIPTS\n\n", update_query)
+            graph.update(update_query)
+    return graph
+
+
+def pre_reasoner_scripts(graph: Graph) -> Graph:
+    """
+
+    """
+    graph = run_clean_scripts("pre", graph)
     graph = clean_agents(graph)
 
-    # post clean up scripts
-    # these are scripts for running after running different functions
-    for sparql_update in (update_dir/"post").glob("*.ru"):
-        graph.query(sparql_update)
-
     return graph
+
+
+def post_reasoner_scripts(graph: Graph) -> Graph:
+    """
+    These update queries and functions will run
+    after the reasoner
+    """
+    print("Running Post Scripts")
+    return run_clean_scripts("post", graph)
