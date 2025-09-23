@@ -4,6 +4,7 @@ from io import StringIO
 from rdflib import Graph
 from typing import Tuple, Union
 from lxml.etree import _Element, _ElementTree
+import re
 
 
 xsl_dir = Path(__file__).parent/"marc2bibframe2"/"xsl"
@@ -24,6 +25,10 @@ ns = {
     "marc": MARC_SLIM
 }
 
+namespaces = {
+    "marc": MARC_SLIM
+}
+
 
 def count_marc_records(marc_tree: Union[_ElementTree, _Element]) -> int:
     """
@@ -31,6 +36,32 @@ def count_marc_records(marc_tree: Union[_ElementTree, _Element]) -> int:
     This should be used to provide a check for other examples
     """
     return len(list(marc_tree.findall(".//{%s}" % MARC_SLIM + "record")))
+
+
+def clean_lang_fields(et: _ElementTree):
+    """
+    Language fields should not have numbers,
+    they should be moved to be a part
+    """
+    root = et.getroot()
+    print("in the cleaning field")
+# ".//marc:datafield[@tag='600' or @tag='610' or @tag='700' or @tag='710' or @tag='800' or @tag='810']/marc:subfield[@code='l']/..",
+    for datafield in root.xpath(
+        ".//marc:datafield[@tag='600' or @tag='610' or @tag='710' or @tag='700' or @tag='800' or @tag='810']/marc:subfield[@code='l']/..",
+        namespaces=namespaces
+    ):
+        # print(f"Datafield: {datafield.tag}")
+        for lang in datafield.findall(".//{%s}subfield[@code='l']" % MARC_SLIM):
+            # print(f"lang: {lang.text}")
+            numbers = re.findall(r'[\d ]+', lang.text)
+            # print(f"numbers: {numbers}")
+            if len(numbers) == 0:
+                continue
+            for num in numbers:
+                num_ele = ET.SubElement(datafield, "{%s}subfield" % MARC_SLIM)
+                num_ele.set("code", "n")
+                num_ele.text = str(num).strip()
+    return et
 
 
 def read_marc_file(marc_file: Path) -> _ElementTree:
@@ -43,6 +74,7 @@ def read_marc_file(marc_file: Path) -> _ElementTree:
     marc_xml = marc_xml.replace('encoding="UTF-8"', "")
     marc_tree = ET.parse(StringIO(marc_xml))
     collection_et = ET.Element("{%s}" % MARC_SLIM + "collection", nsmap=ns)
+    marc_tree = clean_lang_fields(marc_tree)
     for record in marc_tree.findall(".//{%s}" % MARC_SLIM + "record"):
         collection_et.append(record)
 
