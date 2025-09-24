@@ -46,6 +46,7 @@ cmo:ManuscriptResource
   owl:equivalentClass [
     a owl:Class ;
     owl:intersectionOf (
+      cmo:Agent
       [
         a owl:Restriction ;
         owl:onProperty cmo:hasMarcField ;
@@ -96,6 +97,11 @@ cmo:ManuscriptField
                   a owl:Restriction ;
                   owl:onProperty cmo:hasCategory ;
                   owl:hasValue cmt:_SFCat_Language
+                ]
+                [
+                  a owl:Restriction ;
+                  owl:onProperty cmo:hasCategory ;
+                  owl:hasValue cmt:_SFCat_SubordinateUnit ;
                 ]
               )
             ]
