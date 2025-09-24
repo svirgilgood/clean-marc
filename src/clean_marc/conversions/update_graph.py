@@ -137,7 +137,7 @@ def run_clean_scripts(dire: str, graph: Graph) -> Graph:
     for sparql_update in (update_dir/dire).glob("*.ru"):
         with open(sparql_update, "r") as qfp:
             update_query = qfp.read()
-            print("\nCLEAN UP SCRIPTS\n\n", update_query)
+            # print("\nCLEAN UP SCRIPTS\n\n", update_query)
             graph.update(update_query)
     return graph
 
