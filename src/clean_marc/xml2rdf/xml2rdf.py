@@ -44,14 +44,18 @@ def clean_lang_fields(et: _ElementTree):
     they should be moved to be a part
     """
     root = et.getroot()
-    print("in the cleaning field")
-# ".//marc:datafield[@tag='600' or @tag='610' or @tag='700' or @tag='710' or @tag='800' or @tag='810']/marc:subfield[@code='l']/..",
+    # print("in the cleaning field")
+    # ".//marc:datafield[@tag='600' or @tag='610' or @tag='700' or @tag='710'
+    # or @tag='800' or @tag='810']/marc:subfield[@code='l']/..",
     for datafield in root.xpath(
-        ".//marc:datafield[@tag='600' or @tag='610' or @tag='710' or @tag='700' or @tag='800' or @tag='810']/marc:subfield[@code='l']/..",
+        ".//marc:datafield[@tag='600' or @tag='610' or @tag='710' or \
+        @tag='700' or @tag='800' or @tag='810']/marc:subfield[@code='l']/..",
         namespaces=namespaces
     ):
         # print(f"Datafield: {datafield.tag}")
-        for lang in datafield.findall(".//{%s}subfield[@code='l']" % MARC_SLIM):
+        for lang in datafield.findall(
+            ".//{%s}subfield[@code='l']" % MARC_SLIM
+        ):
             # print(f"lang: {lang.text}")
             numbers = re.findall(r'[\d ]+', lang.text)
             # print(f"numbers: {numbers}")
@@ -81,7 +85,11 @@ def read_marc_file(marc_file: Path) -> _ElementTree:
     return collection_et
 
 
-def marc2rdf(marc: Union[_ElementTree, _Element], graph: Graph, separate_works=False) -> Tuple[int, Graph]:
+def marc2rdf(
+        marc: Union[_ElementTree, _Element],
+        graph: Graph,
+        separate_works=False
+) -> Tuple[int, Graph]:
     """Add a MARC-XML File to an existing graph, return the graph
     Right now, the separate works flag is not working for some reason.
     This function takes a collection of marc records with the structure:
