@@ -22,6 +22,7 @@
 @prefix ri: <http://id.loc.gov/ontologies/RecordInfo#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix skosxl: <http://www.w3.org/2008/05/skos-xl#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
 @prefix uchicago: <http://lib.uchicago.edu/> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
@@ -191,105 +192,119 @@ cmo:secondIndicator
 cmt:_SFCat_AgentDate
   a cmo:SubfieldCategory ;
   skos:prefLabel "Agent Date" ;
+  sh:order 3 ;
   .
 
 cmt:_SFCat_AltName
   a cmo:SubfieldCategory ;
   skos:prefLabel "Alternative Name" ;
+  sh:order 4 ;
   .
 
 cmt:_SFCat_Appelation
   a cmo:SubfieldCategory ;
   skos:prefLabel "Appelation" ;
+  sh:order 2 ;
   .
 
 cmt:_SFCat_ExternalID
   a cmo:SubfieldCategory ;
   skos:prefLabel "External ID" ;
+  sh:order 5 ;
   .
 
 cmt:_SFCat_Language
   a cmo:SubfieldCategory ;
   skos:prefLabel "Language" ;
+  sh:order 12 ;
   .
 
 cmt:_SFCat_Location
   a cmo:SubfieldCategory ;
   skos:prefLabel "Location" ;
+  sh:order 10 ;
   .
 
 cmt:_SFCat_MiscInfo
   a cmo:SubfieldCategory ;
   skos:prefLabel "Miscellaneous Information" ;
+  sh:order 13 ;
   .
 
 cmt:_SFCat_Name
   a cmo:SubfieldCategory ;
   skos:prefLabel "Name" ;
+  sh:order 1 ;
   .
 
 cmt:_SFCat_Part
   a cmo:SubfieldCategory ;
   skos:prefLabel "Part" ;
+  sh:order 9 ;
   .
 
 cmt:_SFCat_Relator
   a cmo:SubfieldCategory ;
   skos:prefLabel "Relator" ;
+  sh:order 14 ;
   .
 
 cmt:_SFCat_SubordinateUnit
   a cmo:SubfieldCategory ;
   skos:prefLabel "Subordinate Unit" ;
+  sh:order 8 ;
   .
 
 cmt:_SFCat_Subtitle
   a cmo:SubfieldCategory ;
   skos:prefLabel "Subtitle" ;
+  sh:order 7 ;
   .
 
 cmt:_SFCat_Title
   a cmo:SubfieldCategory ;
   skos:prefLabel "Title" ;
+  sh:order 6 ;
   .
 
 cmt:_SFCat_WorkDate
   a cmo:SubfieldCategory ;
   skos:prefLabel "Work Date" ;
+  sh:order 11 ;
   .
 
 ### Example
-<http://svirgilgood.github.io/clean_marc/data/_Agent_00931b03f80a0406a2>
-    <http://svirgilgood.github.io/clean_marc/onto/hasMarcField>  cmd:_MarcField_00001232 ;
-    a <http://svirgilgood.github.io/clean_marc/onto/Agent>, <http://svirgilgood.github.io/clean_marc/onto/Organization>, <http://www.w3.org/2002/07/owl#Thing> ;
-    <http://www.w3.org/2000/01/rdf-schema#label> "Stiftsbibliothek Sankt Gallen Manuscript 382" ;
-    <http://www.w3.org/2000/01/rdf-schema#seeAlso> <http://example.org/12734784#Agent710-29>, <http://example.org/1447246#Agent710-31> .
+#<http://svirgilgood.github.io/clean_marc/data/_Agent_00931b03f80a0406a2>
+#    <http://svirgilgood.github.io/clean_marc/onto/hasMarcField>  cmd:_MarcField_00001232 ;
+#    a <http://svirgilgood.github.io/clean_marc/onto/Agent>, <http://svirgilgood.github.io/clean_marc/onto/Organization>, <http://www.w3.org/2002/07/owl#Thing> ;
+#    <http://www.w3.org/2000/01/rdf-schema#label> "Stiftsbibliothek Sankt Gallen Manuscript 382" ;
+#    <http://www.w3.org/2000/01/rdf-schema#seeAlso> <http://example.org/12734784#Agent710-29>, <http://example.org/1447246#Agent710-31> .
 
 
-cmd:_MarcField_00001232
-        <http://svirgilgood.github.io/clean_marc/onto/fieldNumber> "710" ;
-        <http://svirgilgood.github.io/clean_marc/onto/firstIndicator> "2" ;
-        <http://svirgilgood.github.io/clean_marc/onto/hasPart> [
-            <http://svirgilgood.github.io/clean_marc/onto/hasCategory> <http://svirgilgood.github.io/clean_marc/taxonomy/_SFCat_Name> ;
-            <http://svirgilgood.github.io/clean_marc/onto/hasCode> "a" ;
-            <http://svirgilgood.github.io/clean_marc/onto/hasEntry> "Corporate name or jurisdiction name as entry element (NR)" ;
-            <http://svirgilgood.github.io/clean_marc/onto/hasValue> "Stiftsbibliothek Sankt Gallen" ;
-            a <http://svirgilgood.github.io/clean_marc/onto/SubField>, <http://www.w3.org/2002/07/owl#Thing>
-        ], [
-            <http://svirgilgood.github.io/clean_marc/onto/hasCategory> <http://svirgilgood.github.io/clean_marc/taxonomy/_SFCat_Part> ;
-            <http://svirgilgood.github.io/clean_marc/onto/hasCode> "n" ;
-            <http://svirgilgood.github.io/clean_marc/onto/hasEntry> "Number of part/section/meeting (R)" ;
-            <http://svirgilgood.github.io/clean_marc/onto/hasValue> "382" ;
-            a <http://svirgilgood.github.io/clean_marc/onto/SubField>, <http://www.w3.org/2002/07/owl#Thing>
-        ], [
-            <http://svirgilgood.github.io/clean_marc/onto/hasCategory> <http://svirgilgood.github.io/clean_marc/taxonomy/_SFCat_Subtitle> ;
-            <http://svirgilgood.github.io/clean_marc/onto/hasCode> "k" ;
-            <http://svirgilgood.github.io/clean_marc/onto/hasEntry> "Form subheading (R)" ;
-            <http://svirgilgood.github.io/clean_marc/onto/hasValue> "Manuscript" ;
-            a <http://svirgilgood.github.io/clean_marc/onto/SubField>, <http://www.w3.org/2002/07/owl#Thing>
-        ] ;
-        <http://svirgilgood.github.io/clean_marc/onto/secondIndicator> " " ;
-        a <http://svirgilgood.github.io/clean_marc/onto/MarcField>, <http://www.w3.org/2002/07/owl#Thing> ;
-        rdf:value "7102 $aStiftsbibliothek Sankt Gallen$kManuscript$n382" ;
-  .
+#cmd:_MarcField_00001232
+#        <http://svirgilgood.github.io/clean_marc/onto/fieldNumber> "710" ;
+#        <http://svirgilgood.github.io/clean_marc/onto/firstIndicator> "2" ;
+#        <http://svirgilgood.github.io/clean_marc/onto/hasPart> [
+#            <http://svirgilgood.github.io/clean_marc/onto/hasCategory> <http://svirgilgood.github.io/clean_marc/taxonomy/_SFCat_Name> ;
+#            <http://svirgilgood.github.io/clean_marc/onto/hasCode> "a" ;
+#            <http://svirgilgood.github.io/clean_marc/onto/hasEntry> "Corporate name or jurisdiction name as entry element (NR)" ;
+#            <http://svirgilgood.github.io/clean_marc/onto/hasValue> "Stiftsbibliothek Sankt Gallen" ;
+#            a <http://svirgilgood.github.io/clean_marc/onto/SubField>, <http://www.w3.org/2002/07/owl#Thing>
+#        ], [
+#            <http://svirgilgood.github.io/clean_marc/onto/hasCategory> <http://svirgilgood.github.io/clean_marc/taxonomy/_SFCat_Part> ;
+#            <http://svirgilgood.github.io/clean_marc/onto/hasCode> "n" ;
+#            <http://svirgilgood.github.io/clean_marc/onto/hasEntry> "Number of part/section/meeting (R)" ;
+#            <http://svirgilgood.github.io/clean_marc/onto/hasValue> "382" ;
+#            a <http://svirgilgood.github.io/clean_marc/onto/SubField>, <http://www.w3.org/2002/07/owl#Thing>
+#        ], [
+#            <http://svirgilgood.github.io/clean_marc/onto/hasCategory> <http://svirgilgood.github.io/clean_marc/taxonomy/_SFCat_Subtitle> ;
+#            <http://svirgilgood.github.io/clean_marc/onto/hasCode> "k" ;
+#            <http://svirgilgood.github.io/clean_marc/onto/hasEntry> "Form subheading (R)" ;
+#            <http://svirgilgood.github.io/clean_marc/onto/hasValue> "Manuscript" ;
+#            a <http://svirgilgood.github.io/clean_marc/onto/SubField>, <http://www.w3.org/2002/07/owl#Thing>
+#        ] ;
+#        <http://svirgilgood.github.io/clean_marc/onto/secondIndicator> " " ;
+#        a <http://svirgilgood.github.io/clean_marc/onto/MarcField>, <http://www.w3.org/2002/07/owl#Thing> ;
+#        rdf:value "7102 $aStiftsbibliothek Sankt Gallen$kManuscript$n382" ;
+#  .
 
