@@ -1,0 +1,69 @@
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX bflc: <http://id.loc.gov/ontologies/bflc/>
+PREFIX cc: <http://creativecommons.org/ns#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX madsrdf: <http://www.loc.gov/mads/rdf/v1#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX xs: <http://www.w3.org/2001/XMLSchema#>
+PREFIX cmo: <http://svirgilgood.github.io/clean_marc/onto/>
+PREFIX cmd: <http://svirgilgood.github.io/clean_marc/data/>
+PREFIX cmt: <http://svirgilgood.github.io/clean_marc/taxonomy/>
+
+PREFIX sh: <http://www.w3.org/ns/shacl#>
+
+
+SELECT
+  ?agent
+  ?label
+  (GROUP_CONCAT(DISTINCT str(?type); SEPARATOR=";") AS ?_simplify_types)
+  (GROUP_CONCAT(DISTINCT CONCAT(?formattedOrder, " - ", str(?catName), "|", ?catLabel); SEPARATOR=";") AS ?_create_auth_hierarchy)
+WHERE {
+  {
+    SELECT ?agent ?catName ?catLabel ?formattedOrder
+    WHERE {
+      ?agent
+        a cmo:Agent ;
+      .
+      OPTIONAL {
+        ?agent
+          cmo:hasMarcField ?marcField ;
+        .
+
+        ?marcField
+          cmo:hasPart ?subField ;
+        .
+        OPTIONAL {
+          ?subField
+            cmo:hasCategory ?catIri ;
+            cmo:hasValue ?catLabel ;
+          .
+          ?catIri
+            skos:prefLabel ?catName ;
+            sh:order ?order ;
+          .
+          BIND(
+            COALESCE(
+              IF(strlen(str(?order)) = 2, str(?order), 1/0),
+              IF(strlen(str(?order)) = 1, CONCAT("0", str(?order)), 1/0),
+              str("0")
+            )
+            AS ?formattedOrder
+          )
+        }
+      }
+    }
+    ORDER BY ?agent
+  }
+  ?agent
+    a cmo:Agent, ?type ;
+    rdfs:label ?label ;
+  .
+  FILTER(?type != cmo:Agent)
+  FILTER(?type != owl:Thing)
+  #BIND(REPLACE(str(?type), "http://svirgilgood.github.io/clean_marc/onto/", "") AS ?types)
+}
+GROUP BY ?agent ?label

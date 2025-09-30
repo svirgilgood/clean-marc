@@ -1,0 +1,187 @@
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX bflc: <http://id.loc.gov/ontologies/bflc/>
+PREFIX cc: <http://creativecommons.org/ns#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX madsrdf: <http://www.loc.gov/mads/rdf/v1#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX xs: <http://www.w3.org/2001/XMLSchema#>
+PREFIX cmo: <http://svirgilgood.github.io/clean_marc/onto/>
+PREFIX cmd: <http://svirgilgood.github.io/clean_marc/data/>
+PREFIX cmt: <http://svirgilgood.github.io/clean_marc/taxonomy/>
+
+
+SELECT
+  ?agent
+  ?label
+  (GROUP_CONCAT(DISTINCT str(?type); SEPARATOR=";") AS ?types)
+  (GROUP_CONCAT(DISTINCT str(?catName); SEPARATOR=";") AS ?name)
+  (GROUP_CONCAT(DISTINCT str(?catAppelation); SEPARATOR=";") AS ?appelation)
+  (GROUP_CONCAT(DISTINCT str(?catAgentDate); SEPARATOR=";") AS ?agentDate)
+  (GROUP_CONCAT(DISTINCT str(?catAltName); SEPARATOR=";") AS ?altName)
+  (GROUP_CONCAT(DISTINCT str(?catExID); SEPARATOR=";") AS ?externalids)
+  (GROUP_CONCAT(DISTINCT ?catTitle; SEPARATOR=";") AS ?workTitle)
+  (GROUP_CONCAT(DISTINCT ?catSubTitle; SEPARATOR=";") AS ?subTitle)
+  (GROUP_CONCAT(DISTINCT ?catSubUnit; SEPARATOR=";") AS ?subUnit)
+  (GROUP_CONCAT(DISTINCT ?catPart; SEPARATOR=";") AS ?part)
+  (GROUP_CONCAT(DISTINCT ?catLocation; SEPARATOR=";") AS ?location)
+  (GROUP_CONCAT(DISTINCT ?catWorkDate; SEPARATOR=";") AS ?workDate)
+  (GROUP_CONCAT(DISTINCT ?catLang; SEPARATOR=";") AS ?language)
+  (GROUP_CONCAT(DISTINCT ?catMiscInfo; SEPARATOR=";") AS ?miscInfo)
+  (GROUP_CONCAT(DISTINCT ?catRelator; SEPARATOR=";") AS ?relator)
+
+WHERE {
+  # VALUES ?agent { cmd:_Agent_01677017bfb8991ab8 }
+  #values ?agent { cmd:_Agent_648a2add612722aa80  }
+  #values ?agent {
+  #  cmd:_Agent_0482f16856c0cf7ea6  }
+    #  cmd:_Agent_01677017bfb8991ab8 }
+
+  {
+    SELECT ?agent
+    WHERE {
+      ?agent
+        a cmo:Agent ;
+      .
+      OPTIONAL {
+        ?agent
+          cmo:hasMarcField ?marcField ;
+        .
+
+        ?marcField
+          cmo:hasPart ?subField ;
+        .
+      }
+      OPTIONAL {
+        ?subField
+          cmo:hasCategory ?catIri ;
+          cmo:hasValue ?catLabel ;
+        .
+        ?catIri
+          skos:prefLabel ?catName ;
+          sh:order ?order ;
+        .
+      }
+    }
+    ORDER BY ?agent ?order
+  }
+  ?agent
+    a cmo:Agent, ?type ;
+    rdfs:label ?label ;
+  .
+  OPTIONAL {
+    ?agent
+      cmo:hasMarcField ?marcField .
+      ?marcField
+        cmo:hasPart ?subField ;
+      .
+  }
+
+  FILTER(?type != cmo:Agent)
+
+  OPTIONAL {
+    ?subField
+        cmo:hasCategory cmt:_SFCat_Name ;
+        cmo:hasValue ?catN ;
+    .
+  }
+  BIND(IF(BOUND(?catN), ?catN, "") AS ?catName)
+  OPTIONAL {
+  ?subField
+      cmo:hasCategory cmt:_SFCat_Appelation ;
+      cmo:hasValue ?catApp ;
+    .
+  }
+  BIND(IF(BOUND(?catApp), ?catApp, "") AS ?catAppelation)
+
+  OPTIONAL {
+    ?subField
+      cmo:hasCategory cmt:_SFCat_AgentDate ;
+      cmo:hasValue ?catAD ;
+    .
+  }
+  BIND(IF(BOUND(?catAD), ?catAD, "") AS ?catAgentDate)
+  OPTIONAL {
+    ?subField
+      cmo:hasCategory cmt:_SFCat_AltName ;
+      cmo:hasValue ?catAltN ;
+    .
+  }
+  BIND(IF(BOUND(?catAltN), ?catAltN, "") AS ?catAltName)
+
+  OPTIONAL {
+    ?subField
+      cmo:hasCategory cmt:_SFCat_ExternalID ;
+      cmo:hasValue ?catEId ;
+    .
+  }
+  BIND(IF(BOUND(?catEId), ?catEId, "") AS ?catExID)
+  OPTIONAL {
+    ?subField
+      cmo:hasCategory cmt:_SFCat_Title ;
+      cmo:hasValue ?catTi ;
+    .
+  }
+  BIND(IF(BOUND(?catTi), ?catTi, "") AS ?catTitle)
+  OPTIONAL {
+    ?subField
+      cmo:hasCategory cmt:_SFCat_Subtitle ;
+      cmo:hasValue ?catSTi ;
+    .
+  }
+  BIND(IF(BOUND(?catSTi), ?catSTi, "") AS ?catSubTitle)
+  OPTIONAL {
+    ?subField
+      cmo:hasCategory cmt:_SFCat_SubordinateUnit ;
+      cmo:hasValue ?catSubU ;
+    .
+  }
+  BIND(IF(BOUND(?catSubU), ?catSubU, "") AS ?catSubUnit)
+  OPTIONAL {
+    ?subField
+      cmo:hasCategory cmt:_SFCat_Part   ;
+      cmo:hasValue ?catP ;
+    .
+  }
+  BIND(IF(BOUND(?catP), ?catP, "") AS ?catPart)
+  OPTIONAL {
+    ?subField
+      cmo:hasCategory cmt:_SFCat_Location ;
+      cmo:hasValue ?catLoc ;
+    .
+  }
+  BIND(IF(BOUND(?catLoc), ?catLoc, "") AS ?catLocation)
+
+  OPTIONAL {
+    ?subField
+      cmo:hasCategory cmt:_SFCat_WorkDate ;
+      cmo:hasValue ?catWD ;
+    .
+  }
+  BIND(IF(BOUND(?catWD), ?catWD, "") AS ?catWorkDate)
+  OPTIONAL {
+    ?subField
+      cmo:hasCategory cmt:_SFCat_Language ;
+      cmo:hasValue ?catLa ;
+    .
+  }
+  BIND(IF(BOUND(?catLa), ?catLa, "") AS ?catLang)
+  OPTIONAL {
+    ?subField
+      cmo:hasCategory cmt:_SFCat_MiscInfo ;
+      cmo:hasValue ?catMI ;
+    .
+  }
+  BIND(IF(BOUND(?catMI), ?catMI, "") AS ?catMiscInfo)
+  OPTIONAL {
+    ?subField
+      cmo:hasCategory cmt:_SFCat_Relator ;
+      cmo:hasValue ?catRel ;
+    .
+  }
+  BIND(IF(BOUND(?catRel), ?catRel, "") AS ?catRelator )
+}
+GROUP BY ?agent ?label
