@@ -115,6 +115,27 @@ def create_topics_hierarchy(series: pd.Series, **kwargs) -> pd.Series:
     return series
 
 
+def create_auth_hierarchy(series: pd.Series, **kwargs) -> pd.Series:
+    """
+    """
+    auths = series["_create_auth_hierarchy"]
+
+    if type(auths) is not str:
+        return series
+    auth_list = auths.split(";")
+
+    for auth in auth_list:
+        if type(auth) is not str:
+            continue
+        auth_comp, auth_name = auth.split("|")
+        try:
+            series[auth_comp] = series[auth_comp] + ";" + auth_name
+        except KeyError:
+            series[auth_comp] = auth_name
+
+    return series
+
+
 def clean_name(name: str) -> str:
     """
     Remove final punctuation from a name string
@@ -328,7 +349,8 @@ def simplify_types(series: pd.Series, **kwargs) -> pd.Series:
     term_types = {
         x
         .replace("http://id.loc.gov/ontologies/bibframe/", "")
-        .replace("http://www.loc.gov/mads/rdf/v1#", "")
+        .replace("http://svirgilgood.github.io/clean_marc/onto/", "")
+        .replace("http://www.loc.gov/mads/rdf/v1#", "").strip()
         for x in series["_simplify_types"].split(";")
     }
     if "GenreForm" in term_types:
@@ -380,4 +402,5 @@ cleaning_functions = {
     "_simplify_types": simplify_types,
     "_add_uuid": return_uuid,
     "_split_agent_marc_string": split_agent_marc_string,
+    "_create_auth_hierarchy": create_auth_hierarchy,
 }
