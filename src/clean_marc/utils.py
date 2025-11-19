@@ -1,15 +1,17 @@
 import re
 from rdflib import Graph, URIRef, RDF
 import pandas as pd
-from typing import Union
+from typing import Union, Dict
 from .marc.marc import (
     ONEHUNDRED_CODES,
     ONEHUNDREDTEN_CODES,
     SIXHUNDRED_CODES,
-    SIXHUNDERDTEN_CODES,
+    SIXHUNDREDTEN_CODES,
+    SIXHUNDREDELEVEN_CODES,
     EIGHTHUNDRED_CODES,
     EIGHTHUNDREDTEN_CODES,
     SEVENHUNDREDTEN_CODES,
+    SEVENHUNDREDELEVEN_CODES,
     SEVENHUNDRED_CODES,
 )
 
@@ -115,6 +117,26 @@ def create_topics_hierarchy(series: pd.Series, **kwargs) -> pd.Series:
     return series
 
 
+def split_dates(series: pd.Series, **kwargs) -> pd.Series:
+    """
+    Relies on a column "03-Agent Date"
+    """
+    try:
+        dates = series["03-Agent Date"]
+    except KeyError:
+        return series
+    for date in dates.split(";"):
+        if date.find("active") != -1:
+            continue
+        birth, death = date.split("-")
+        if death and death[-1] in (".", ","):
+            death = death[:-1]
+        series["03a-Birth"] = birth
+        series["03b-Death"] = death
+
+    return series
+
+
 def create_auth_hierarchy(series: pd.Series, **kwargs) -> pd.Series:
     """
     """
@@ -128,10 +150,13 @@ def create_auth_hierarchy(series: pd.Series, **kwargs) -> pd.Series:
         if type(auth) is not str:
             continue
         auth_comp, auth_name = auth.split("|")
+        if auth_comp == "01-Name":
+            auth_name = clean_name(auth_name)
         try:
             series[auth_comp] = series[auth_comp] + ";" + auth_name
         except KeyError:
             series[auth_comp] = auth_name
+    series = split_dates(series)
 
     return series
 
@@ -239,7 +264,13 @@ def create_contributions(series: pd.Series, **kwargs) -> pd.Series:
     return series
 
 
-def return_uuid(series: pd.Series, add_df=Union[None, pd.DataFrame], **kwargs) -> pd.Series:
+def return_uuid(
+    series: pd.Series,
+    add_df=Union[None, pd.DataFrame],
+    oclc2uuid=Dict[str, str],
+    # oclc_col=[],
+    **kwargs
+) -> pd.Series:
     """
     The add_df is passed in from the wrapping function.
     """
@@ -248,7 +279,6 @@ def return_uuid(series: pd.Series, add_df=Union[None, pd.DataFrame], **kwargs) -
     oclc_number = series["_add_uuid"]
     if type(oclc_number) is int and oclc_number > 0:
         oclc_number = str(oclc_number)
-
     elif type(oclc_number) is not str:
         return series
     else:
@@ -258,7 +288,12 @@ def return_uuid(series: pd.Series, add_df=Union[None, pd.DataFrame], **kwargs) -
         uuids = []
         abbreviations = []
         for oclc in oclcs:
-            uuid_id = add_df.loc[add_df["OCLC number"] == int(oclc)]
+            # uuid_id = add_df.loc[add_df["OCLC number"] == int(oclc)]
+            try:
+                uuids = uuids + oclc2uuid[oclc]
+            except KeyError:
+                continue
+            """
             try:
                 uuid = uuid_id["UUID"].values[0]
                 uuids.append(uuid)
@@ -266,14 +301,15 @@ def return_uuid(series: pd.Series, add_df=Union[None, pd.DataFrame], **kwargs) -
                 abbreviations.append(abr)
             except IndexError:
                 continue
+            """
         series["UUID"] = ";".join(uuids)
-        series["Abbreviation"] = ";".join(abbreviations)
+        # series["Abbreviation"] = ";".join(abbreviations)
         return series
     except KeyError:
         return series
     except IndexError:
         print(f"Index Error: {series}")
-        print(f"UUID row: {uuid_id}")
+        # print(f"UUID row: {uuid_id}")
         return series
 
 
@@ -293,9 +329,11 @@ def split_agent_marc_string(series: pd.Series, **kwargs) -> pd.Series:
             case "100": value_dict = ONEHUNDRED_CODES
             case "110": value_dict = ONEHUNDREDTEN_CODES
             case "600": value_dict = SIXHUNDRED_CODES
-            case "610": value_dict = SIXHUNDERDTEN_CODES
+            case "610": value_dict = SIXHUNDREDTEN_CODES
+            case "611": value_dict = SIXHUNDREDELEVEN_CODES
             case "700": value_dict = SEVENHUNDRED_CODES
             case "710": value_dict = SEVENHUNDREDTEN_CODES
+            case "711": value_dict = SEVENHUNDREDELEVEN_CODES
             case "800": value_dict = EIGHTHUNDRED_CODES
             case "810": value_dict = EIGHTHUNDREDTEN_CODES
             case _:
@@ -355,6 +393,8 @@ def simplify_types(series: pd.Series, **kwargs) -> pd.Series:
     }
     if "GenreForm" in term_types:
         term_type = "GenreForm"
+    if "Meeting" in term_types:
+        term_type = "Meeting"
     elif "Place" in term_types or "Geographic" in term_types:
         term_type = "Geographic"
     elif "Event" in term_types or "Temporal" in term_types:
