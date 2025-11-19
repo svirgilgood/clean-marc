@@ -12,6 +12,8 @@ PREFIX xs: <http://www.w3.org/2001/XMLSchema#>
 
 
 SELECT
+  #
+  (GROUP_CONCAT(DISTINCT str(?work); separator=";") AS ?workUris )
   (GROUP_CONCAT(DISTINCT str(?agentIRI); separator=";") AS ?ari)
   (GROUP_CONCAT(DISTINCT ?l; separator=";") AS ?label)
   (GROUP_CONCAT(DISTINCT ?mf; separator=";") AS ?marcfield)
