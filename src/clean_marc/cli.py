@@ -6,7 +6,7 @@ import os
 
 import pandas as pd
 from io import StringIO
-from typing import Dict, Callable
+from typing import Dict, Callable, List, Tuple
 import lxml.etree as etree
 
 from .oclc import oclc
@@ -71,6 +71,32 @@ def read_worldcat_items(file_name: Path) -> pd.DataFrame:
     return df
 
 
+def create_oclc_list(
+        df: DataFrame,
+        columns: List[str],
+        cell_separator=";"
+) -> Tuple[List[str], Dict[str, List[str]]]:
+    """
+    For a list of columns in a dataframe that can have an OCLC Number
+    Iterate through that list.
+    Each cell can have multiple values. If the separator in those cell
+    is not `;` provide that as an argument.
+    """
+    oclc_numbers: List[str] = []
+    oclc2uuid: Dict[str, List[str]] = {}
+    for _, row in df.iterrows():
+        uuid = row.get("UUID")
+        for column in columns:
+            cell_value = row.get(column)
+            for val in str(cell_value).split(cell_separator):
+                if val == "None":
+                    continue
+                oclc_numbers.append(val.strip())
+                oclc2uuid.setdefault(val.strip(), []).append(uuid)
+
+    return (oclc_numbers, oclc2uuid)
+
+
 def cli():
     """
     This is the command line interface. Handling the calls to the different
@@ -97,9 +123,17 @@ def cli():
         # action="store_true",
         nargs="?",
         help="""return marc record for oclc numbers. These must have a column
-        'OCLC number'. The OCLC number column is used to
+        'OCLC number (digital)'. The OCLC number column is used to
         query the worldcat
         database""",
+    )
+    parser.add_argument(
+        "-n",
+        "--oclc-numbers",
+        action="append",
+        help="""If the worldcat spreadsheet contains a different column than
+        OCLC number (digital), or if there are multiple columns for OCLC
+        numbers, repeat this argument with the different column headers."""
     )
     parser.add_argument(
         "-x",
@@ -121,14 +155,14 @@ def cli():
         nargs="?",
         help="""specify the directory to save the output files to, if no
         argument is specified, the default current working directory will be
-        used"""
+        used""",
     )
     parser.add_argument(
         "-i",
         "--skip-inference",
         action="store_true",
         help="""skip the inferencing step. Inferencing can take some time, this
-        skips the inferencing step"""
+        skips the inferencing step""",
     )
 
     args = parser.parse_args()
@@ -143,9 +177,16 @@ def cli():
     else:
         dir = Path(".")
 
+    oclc_numbers: List[str] = []
+    oclc2uuid: Dict[str, List[str]] = {}
     if args.worldcat:
         worldcat_df = read_worldcat_items(args.worldcat)
-        oclc_numbers = list(worldcat_df["OCLC number"])
+        if args.oclc_numbers:
+            oclc_numbers, oclc2uuid = create_oclc_list(
+                worldcat_df, args.oclc_numbers)
+        else:
+            oclc_numbers, oclc2uuid = create_oclc_list(
+                worldcat_df, ["OCLC number (digital)"])
         marc_tree = oclc.create_marc_collection(oclc_numbers=oclc_numbers)
         if args.save_xml:
             with open(dir / args.save_xml, "w") as fp:
@@ -209,5 +250,6 @@ def cli():
                               separator="\t").decode()
             )
         )
-        df = apply_functions(df, cleaning_functions, add_df=worldcat_df)
+        df = apply_functions(df, cleaning_functions,
+                             add_df=worldcat_df, oclc2uuid=oclc2uuid)
         df.to_excel(dir / f"{name}.xlsx", index=False)
