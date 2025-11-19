@@ -570,7 +570,7 @@ SEVENHUNDRED_CODES = {
 # 7 - Source specified in subfield $2
 # Subject added entry conforms to a set of subject heading system/thesaurus
 # building rules. The identifying code is given in subfield $2.
-SIXHUNDERDTEN_CODES = {
+SIXHUNDREDTEN_CODES = {
     "class": CMO.Organization,
     "first-indicator": {
         "0": {
@@ -718,6 +718,143 @@ SIXHUNDERDTEN_CODES = {
             "term": CMT._SFCat_MiscInfo,
         },
     },
+}
+
+SIXHUNDREDELEVEN_CODES = {
+    "class": CMO.Meeting,
+    "first-indicator": {
+
+        "0": "Inverted name",
+        "1": "Jurisdiction name",
+        "2": "Name in direct order",
+    },
+    "second-indicator": {
+        "0": "Library of Congress Subject Headings",
+        "1": "Library of Congress Childrens and Young Adults Subject Headings",
+        "2": "Medical Subject Headings",
+        "3": "National Agricultural Library subject authority file",
+        "4": "Source not specified",
+        "5": "Canadian Subject Headings",
+        "6": "Répertoire de vedettes-matière",
+        "7": "Source specified in subfield $2"
+
+    },
+    "subfield-codes": {
+
+        "a": {
+            "value": "Meeting name or jurisdiction name as entry element (NR)",
+            "term": CMT._SFCat_Name,
+        },
+        "c": {
+            "value": "Location of meeting (R)",
+            "term": CMT._SFCat_Location,
+        },
+        "d": {
+            "value": "Date of meeting or treaty signing (R)",
+            "term": CMT._SFCat_Date,
+        },
+        "e": {
+            "value": "Subordinate unit (R)",
+            "term": CMT._SFCat_SubordinateUnit,
+        },
+        "f": {
+            "value": "Date of a work (NR)",
+            "term": CMT._SFCat_WorkDate,
+        },
+        "g": {
+            "value": "Miscellaneous information (R)",
+            "term": CMT._SFCat_MiscInfo,
+        },
+        "h": {
+            "value": "Medium (NR)",
+            "term": CMT._SFCat_MiscInfo,
+        },
+        "j": {
+            "value": "Relator term (R)",
+            "term": CMT._SFCat_Relator,
+        },
+        "k": {
+            "value": "Form subheading (R)",
+            "term": CMT._SFCat_Subtitle,
+        },
+        "l": {
+            "value": "Language of a work (NR)",
+            "term": CMT._SFCat_Language,
+        },
+        "n": {
+            "value": "Number of part/section/meeting (R)",
+            "term": CMT._SFCat_Part,
+        },
+        "p": {
+            "value": "Name of part/section of a work (R)",
+            "term": CMT._SFCat_Part,
+        },
+        "q": {
+            "value": "Name of meeting following jurisdiction name entry element (NR)",
+            "term": CMT._SFCat_JurisdictionName,
+        },
+        "s": {
+            "value": "Version (R)",
+            "term": CMT._SFCat_MiscInfo,
+        },
+        "t": {
+            "value": "Title of a work (NR)",
+            "term": CMT._SFCat_Title,
+        },
+        "u": {
+            "value": "Affiliation (NR)",
+            "term": CMT._SFCat_Affiliation,
+        },
+        "v": {
+            "value": "Form subdivision (R)",
+            "term": CMT._SFCat_Subtitle,
+        },
+        "x": {
+            "value": "General subdivision (R)",
+            "term": CMT._SFCat_Subdivision,
+        },
+        "y": {
+            "value": "Chronological subdivision (R)",
+            "term": CMT._SFCat_WorkDate,
+        },
+        "z": {
+            "value": "Geographic subdivision (R)",
+            "term": CMT._SFCat_Location,
+        },
+        "0": {
+            "value": "Authority record control number or standard number (R)",
+            "term": CMT._SFCat_ExternalID,
+        },
+        "1": {
+            "value": "Real World Object URI (R)",
+            "term": CMT._SFCat_ExternalID,
+        },
+        "2": {
+            "value": "Source of heading or term (NR)",
+            "term": CMT._SFCat_MiscInfo,
+        },
+        "3": {
+            "value": "Materials specified (NR)",
+            "term": CMT._SFCat__MiscInfo,
+        },
+        "4": {
+            "value": "Relationship (R)",
+            "term": CMT._SFCat_Relator,
+        },
+        "6": {
+            "value": "Linkage (NR)",
+            "term": CMT._SFCat_MiscInfo,
+        },
+        "7": {
+            "value": "Data provenance (R)",
+            "term": CMT._SFCat_MiscInfo,
+        },
+        "8": {
+            "value": "Field link and sequence number (R)",
+            "term": CMT._SFCat_MiscInfo,
+        }
+    }
+
 }
 
 # 710:
@@ -872,6 +1009,140 @@ SEVENHUNDREDTEN_CODES = {
     },
 }
 
+# 711
+# Added entry in which the entry element is a meeting name.
+#
+# Added entries are assigned according to various cataloging rules to give
+# access to the bibliographic record from meeting or conference name headings
+# which may not be more appropriately assigned as 611 (Subject Added Entry-
+# Meeting Name) or 811 (Series Added Entry-Meeting Name) fields.
+
+SEVENHUNDREDELEVEN_CODES = {
+    "class": CMO.Meeting,
+    "first-indicator": {
+
+        "0": "Inverted name",
+        "1": "Jurisdiction name",
+        "2": "Name in direct order",
+    },
+    "second-indicator": {
+        "#": "No information provided",
+        "2": "Analytical Entry",
+
+    },
+    "subfield-codes": {
+
+        "a": {
+            "value": "Meeting name or jurisdiction name as entry element (NR)",
+            "term": CMT._SFCat_Name,
+        },
+        "c": {
+            "value": "Location of meeting (R)",
+            "term": CMT._SFCat_Location,
+        },
+        "d": {
+            "value": "Date of meeting or treaty signing (R)",
+            "term": CMT._SFCat_Date,
+        },
+        "e": {
+            "value": "Subordinate unit (R)",
+            "term": CMT._SFCat_SubordinateUnit,
+        },
+        "f": {
+            "value": "Date of a work (NR)",
+            "term": CMT._SFCat_WorkDate,
+        },
+        "g": {
+            "value": "Miscellaneous information (R)",
+            "term": CMT._SFCat_MiscInfo,
+        },
+        "h": {
+            "value": "Medium (NR)",
+            "term": CMT._SFCat_MiscInfo,
+        },
+        "i": {
+            "value": "Relationship information",
+            "term": CMT._SFCat_Relator
+        },
+        "j": {
+            "value": "Relator term (R)",
+            "term": CMT._SFCat_Relator,
+        },
+        "k": {
+            "value": "Form subheading (R)",
+            "term": CMT._SFCat_Subtitle,
+        },
+        "l": {
+            "value": "Language of a work (NR)",
+            "term": CMT._SFCat_Language,
+        },
+        "n": {
+            "value": "Number of part/section/meeting (R)",
+            "term": CMT._SFCat_Part,
+        },
+        "p": {
+            "value": "Name of part/section of a work (R)",
+            "term": CMT._SFCat_Part,
+        },
+        "q": {
+            "value": "Name of meeting following jurisdiction name entry element (NR)",
+            "term": CMT._SFCat_JurisdictionName,
+        },
+        "s": {
+            "value": "Version (R)",
+            "term": CMT._SFCat_MiscInfo,
+        },
+        "t": {
+            "value": "Title of a work (NR)",
+            "term": CMT._SFCat_Title,
+        },
+        "u": {
+            "value": "Affiliation (NR)",
+            "term": CMT._SFCat_Affiliation,
+        },
+        "x": {
+            "value": "General subdivision (R)",
+            "term": CMT._SFCat_Subdivision,
+        },
+        "0": {
+            "value": "Authority record control number or standard number (R)",
+            "term": CMT._SFCat_ExternalID,
+        },
+        "1": {
+            "value": "Real World Object URI (R)",
+            "term": CMT._SFCat_ExternalID,
+        },
+        "2": {
+            "value": "Source of heading or term (NR)",
+            "term": CMT._SFCat_MiscInfo,
+        },
+        "3": {
+            "value": "Materials specified (NR)",
+            "term": CMT._SFCat__MiscInfo,
+        },
+        "4": {
+            "value": "Relationship (R)",
+            "term": CMT._SFCat_Relator,
+        },
+        "5": {
+            "value": "Institution to which field applies (NR)",
+            "term": CMT._SFCat_MiscInfo,
+        },
+        "6": {
+            "value": "Linkage (NR)",
+            "term": CMT._SFCat_MiscInfo,
+        },
+        "7": {
+            "value": "Data provenance (R)",
+            "term": CMT._SFCat_MiscInfo,
+        },
+        "8": {
+            "value": "Field link and sequence number (R)",
+            "term": CMT._SFCat_MiscInfo,
+        }
+    }
+
+}
 # 800
 # FIELD DEFINITION AND SCOPE
 # Author/title series added entry in which the author portion is a personal

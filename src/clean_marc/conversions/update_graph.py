@@ -12,10 +12,12 @@ from ..marc.marc_data import (
     ONEHUNDRED_CODES,
     ONEHUNDREDTEN_CODES,
     SIXHUNDRED_CODES,
-    SIXHUNDERDTEN_CODES,
+    SIXHUNDREDTEN_CODES,
+    SIXHUNDREDELEVEN_CODES,
     EIGHTHUNDRED_CODES,
     EIGHTHUNDREDTEN_CODES,
     SEVENHUNDREDTEN_CODES,
+    SEVENHUNDREDELEVEN_CODES,
     SEVENHUNDRED_CODES,
 )
 
@@ -47,9 +49,11 @@ def return_value_dict(field: str, marc: str):
         case "100": value_dict = ONEHUNDRED_CODES
         case "110": value_dict = ONEHUNDREDTEN_CODES
         case "600": value_dict = SIXHUNDRED_CODES
-        case "610": value_dict = SIXHUNDERDTEN_CODES
+        case "610": value_dict = SIXHUNDREDTEN_CODES
+        case "611": value_dict = SIXHUNDREDELEVEN_CODES
         case "700": value_dict = SEVENHUNDRED_CODES
         case "710": value_dict = SEVENHUNDREDTEN_CODES
+        case "711": value_dict = SEVENHUNDREDELEVEN_CODES
         case "800": value_dict = EIGHTHUNDRED_CODES
         case "810": value_dict = EIGHTHUNDREDTEN_CODES
         case _:
@@ -84,6 +88,8 @@ def clean_agents(graph: Graph) -> Graph:
         label = agent_row.label
         agent_iri = create_data_iri(label)
         agent_graph.add((agent_iri, RDF.type, CMO.Agent))
+        # work_iris = [URIRef(iri) for iri in agent_row.workUris.split(";")]
+
         for original_iri in agent_row.ari.split(";"):
             agent_graph.add(
                 (agent_iri, RDFS.seeAlso, URIRef(original_iri))
@@ -92,10 +98,30 @@ def clean_agents(graph: Graph) -> Graph:
             (agent_iri, RDFS.label, Literal(label, datatype=XSD.string))
         )
         bnode = BNode()
+        """Creates triples with approximate shape
+        <agent_iri>
+            a cmo:Organization ;
+            cmo:hasMarcField [
+                a cmo:MarcField ;
+                cmo:fieldNumber "710" ;
+                cmo:firstIndicator "1" ;
+                cmo:secondIndicator "2" ;
+                cmo:hasPart [
+                    a cmo:SubField ;
+                    cmo:hasEntry "Form Subheading (R)" ;
+                    cmo:hasValue "Manuscript" ;
+                    cmo:hasCode "k" ;
+                    cmo:hasCategory cmt:_SFCat_Subtitle ;
+                ]
+            ] ;
+        """
         agent_graph.add((agent_iri, HAS_MARC_FIELD, bnode))
         agent_graph.add((bnode, RDF.type, CMO.MarcField))
         agent_graph.add((bnode, CMO.fieldNumber, Literal(
             agent_row.marcfield, datatype=XSD.string)))
+        # for work_iri in work_iris:
+        #    agent_graph.add(
+        #        (work_iri, URIRef(ONTO_NAMESPACE + agent_row.marcfield), agent_iri))
         agent_graph.add((bnode, CMO.firstIndicator, Literal(
             agent_row.firstIndicator, datatype=XSD.string)))
         agent_graph.add((bnode, CMO.secondIndicator, Literal(
@@ -103,6 +129,8 @@ def clean_agents(graph: Graph) -> Graph:
         agent_graph.add((bnode, RDF.value, Literal(agent_row.marcKey)))
         value_dict = return_value_dict(
             agent_row.marcfield.strip(), agent_row.marcKey)
+        if not value_dict:
+            continue
         agent_graph.add((agent_iri, RDF.type, value_dict["class"]))
         # print("marc key: ", agent_row.marcKey)
         for subfield in agent_row.marcKey[5:].split("$"):
@@ -148,6 +176,19 @@ def pre_reasoner_scripts(graph: Graph) -> Graph:
     """
     graph = run_clean_scripts("pre", graph)
     graph = clean_agents(graph)
+    for object_uri in graph.objects():
+        obj = object_uri.encode().decode()
+        if type(object_uri) is not URIRef:
+            continue
+        # if type(object) is not URIRef or obj.find(" ") > -1:
+        if obj.find(" ") <= -1:
+            continue
+        print("object", obj)
+        obj = obj.replace(" ", "%20")
+        new_obj_uri = URIRef(obj)
+        for subj, pred, _ in graph.triples((None, None, object_uri)):
+            graph.remove((subj, pred, object_uri))
+            graph.add((subj, pred, new_obj_uri))
 
     return graph
 
