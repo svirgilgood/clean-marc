@@ -128,11 +128,14 @@ def split_dates(series: pd.Series, **kwargs) -> pd.Series:
     for date in dates.split(";"):
         if date.find("active") != -1:
             continue
-        birth, death = date.split("-")
-        if death and death[-1] in (".", ","):
-            death = death[:-1]
-        series["03a-Birth"] = birth
-        series["03b-Death"] = death
+        try:
+            birth, death = date.split("-")
+            if death and death[-1] in (".", ","):
+                death = death[:-1]
+            series["03a-Birth"] = birth
+            series["03b-Death"] = death
+        except ValueError:
+            continue
 
     return series
 
