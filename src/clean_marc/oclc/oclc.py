@@ -118,8 +118,7 @@ def create_marc_collection(oclc_numbers=oclc_numbers) -> _Element:
                 time.sleep(2)
                 result = session.bib_get(oclc)
             except bookops_worldcat.errors.InvalidOclcNumber:
-                print(f"Not an OCLC Number {oclc}")
-                continue
+                print(f"OCLC Number not found: {oclc}")
 
             xml_text = result.text
             xml_text = xml_text.replace("encoding='UTF-8'", '')
