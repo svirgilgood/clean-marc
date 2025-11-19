@@ -172,10 +172,16 @@ def run_clean_scripts(dire: str, graph: Graph) -> Graph:
 
 def pre_reasoner_scripts(graph: Graph) -> Graph:
     """
-
+    Pre-reasoner scripts are run before the OWL reasonerL
     """
     graph = run_clean_scripts("pre", graph)
     graph = clean_agents(graph)
+    """
+    Some of the Bibframe from Marc Records use spaces
+    in the IRIs. So far, these seem to only be IDs (especially
+    call numbers), but only used as objects.
+    This will fix these objects
+    """
     for object_uri in graph.objects():
         obj = object_uri.encode().decode()
         if type(object_uri) is not URIRef:
