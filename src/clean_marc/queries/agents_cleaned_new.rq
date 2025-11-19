@@ -20,7 +20,7 @@ SELECT
   ?agent
   ?label
   (GROUP_CONCAT(DISTINCT str(?type); SEPARATOR=";") AS ?_simplify_types)
-  (GROUP_CONCAT(DISTINCT CONCAT(?formattedOrder, " - ", str(?catName), "|", ?catLabel); SEPARATOR=";") AS ?_create_auth_hierarchy)
+  (GROUP_CONCAT(DISTINCT CONCAT(?formattedOrder, "-", str(?catName), "|", ?catLabel); SEPARATOR=";") AS ?_create_auth_hierarchy)
 WHERE {
   {
     SELECT ?agent ?catName ?catLabel ?formattedOrder
