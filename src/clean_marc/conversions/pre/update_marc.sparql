@@ -12,17 +12,19 @@ PREFIX xs: <http://www.w3.org/2001/XMLSchema#>
 
 
 
-CONSTRUCT {
-  ?agent
-    bflc:marcKey ?marcKey ;
-    bflc:marcKey2 ?mk ;
-      .
+#CONSTRUCT {
+#  ?agent
+#    bflc:marcKey ?marcKey ;
+#    bflc:marcKey2 ?mk ;
+#      .
 
-}
+#}
+SELECT ?marcKey ?mk
 WHERE {
   ?agent
     bflc:marcKey ?marcKey ;
   .
   FILTER(REGEX(?marcKey, "\\$l[a-zA-Z ]+[0-9]+"))
-  BIND(REPLACE(?marcKey, "(.*)(\\$l[a-zA-Z ]+) ([0-9^$]+)", "$1$2\\$k$3") AS ?mk)
+  BIND(REPLACE(?marcKey, "(.*)(\\$l[a-zA-Z ]+) ([0-9^$]+)", "$1$2$$k$3") AS ?mk)
 }
+LIMIT 10
