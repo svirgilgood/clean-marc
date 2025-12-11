@@ -1,7 +1,9 @@
 import re
 from rdflib import Graph, URIRef, RDF
 import pandas as pd
-from typing import Union, Dict
+from typing import Union, Dict, List
+from enum import Enum
+
 from .marc.marc import (
     ONEHUNDRED_CODES,
     ONEHUNDREDTEN_CODES,
@@ -14,6 +16,12 @@ from .marc.marc import (
     SEVENHUNDREDELEVEN_CODES,
     SEVENHUNDRED_CODES,
 )
+
+
+class QuerDir(Enum):
+    ITEM = "item_queries"
+    RECORD = "record_queries"
+
 
 MARC_SLIM = 'http://www.loc.gov/MARC21/slim'
 
@@ -259,9 +267,19 @@ def create_contributions(series: pd.Series, **kwargs) -> pd.Series:
     for contribution in contributors.split(";"):
         try:
             role, contributor = contribution.split("|")
+            if role == "" and contributor == "":
+                continue
+            # The creators shouldn't also be contributors.
+            # The way BibFrame handles the PrimaryContribution Node.
+            # We only need the contributor if it is not otherwise specified
+            creators = series.get("creators")
+            if isinstance(creators, str) and role == "Contributor" and contributor in creators.split(";"):
+                continue
             if (existing_contrib := series.get(role)):
                 contributor = existing_contrib + ";" + contributor
             series[role] = contributor
+        # except ValueError:
+        #    series[role] = contributor
         except ValueError:
             series["XXContributor"] = f"{contribution} => {contributors}"
     return series
