@@ -380,4 +380,5 @@ def cli():
         query = query_obj["query"]
 
         print(name)
-        save_dataframe(query, name, graph, dir, worldcat_df, oclc2uuid)
+        save_dataframe(query, name, graph, dir,
+                       add_df=worldcat_df, oclc_map=oclc2uuid)
