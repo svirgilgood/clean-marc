@@ -414,7 +414,7 @@ def simplify_types(series: pd.Series, **kwargs) -> pd.Series:
     }
     if "GenreForm" in term_types:
         term_type = "GenreForm"
-    if "Meeting" in term_types:
+    elif "Meeting" in term_types:
         term_type = "Meeting"
     elif "Place" in term_types or "Geographic" in term_types:
         term_type = "Geographic"
@@ -422,6 +422,8 @@ def simplify_types(series: pd.Series, **kwargs) -> pd.Series:
         term_type = "Temporal"
     elif "Organization" in term_types or "CorporateName" in term_types:
         term_type = "Organization"
+    elif "ManuscriptResource" in term_types:
+        term_type = "ManuscriptResource"
     elif "Person" in term_types or "PersonalName" in term_types:
         term_type = "Person"
     else:
