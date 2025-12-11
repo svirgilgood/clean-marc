@@ -6,6 +6,10 @@ __pycache__/
 # C extensions
 *.so
 
+
+# Removing the notes directory from git control
+notes/
+
 # Distribution / packaging
 .Python
 build/
