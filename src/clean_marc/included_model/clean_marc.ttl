@@ -134,6 +134,16 @@ cmo:Person
   skos:prefLabel "Person" ;
   .
 
+cmo:Meeting
+  rdfs:subClassOf cmo:Agent ;
+  skos:prefLabel "Meeting" ;
+  .
+
+cmo:Collection
+  rdfs:subClassOf cmo:Agent ;
+  skos:prefLabel "Collection" ;
+  .
+
 cmo:SubField
   a owl:Class ;
   skos:prefLabel "Marc Subfield" ;
