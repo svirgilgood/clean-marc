@@ -68,6 +68,19 @@ def clean_lang_fields(et: _ElementTree):
     return et
 
 
+def remove_duration(et: _ElementTree):
+    """
+    """
+    root = et.getroot()
+    for datafield in root.xpath(
+        ".//marc:datafield[@tag='306']/marc:subfield[@code='a']",
+        namespaces=namespaces
+    ):
+        parent = datafield.getparent()
+        parent.remove(datafield)
+    return et
+
+
 def read_marc_file(marc_file: Path) -> _ElementTree:
     with open(marc_file, "r")as fp:
         marc_xml = fp.read()
@@ -79,6 +92,8 @@ def read_marc_file(marc_file: Path) -> _ElementTree:
     marc_tree = ET.parse(StringIO(marc_xml))
     collection_et = ET.Element("{%s}" % MARC_SLIM + "collection", nsmap=ns)
     marc_tree = clean_lang_fields(marc_tree)
+    # remove the duration fields
+    # marc_tree = remove_duration(marc_tree)
     for record in marc_tree.findall(".//{%s}" % MARC_SLIM + "record"):
         collection_et.append(record)
 
@@ -109,6 +124,10 @@ def marc2rdf(
         new_dom = work_trans(marc)
     else:
         new_dom = transform(marc)
+    """
+    with open("bf.xml", "w") as fp:
+        fp.write(ET.tostring(new_dom, pretty_print=True).decode())
+    """
     # print(ET.tostring(new_dom, pretty_print=True).decode())
 
     graph.parse(ET.tostring(new_dom), format="xml")
