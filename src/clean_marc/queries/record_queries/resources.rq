@@ -1,0 +1,159 @@
+# Grab all of the resources or the works
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX bflc: <http://id.loc.gov/ontologies/bflc/>
+PREFIX cc: <http://creativecommons.org/ns#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX madsrdf: <http://www.loc.gov/mads/rdf/v1#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX xs: <http://www.w3.org/2001/XMLSchema#>
+PREFIX cmo: <http://svirgilgood.github.io/clean_marc/onto/>
+
+
+
+##############################################################################################################################################################
+#
+#
+#
+##############################################################################################################################################################
+
+SELECT
+  ?uuid
+  (GROUP_CONCAT(DISTINCT ?work; separator=";") AS ?works)
+  (SAMPLE(?workTitle) AS ?wt)
+  (GROUP_CONCAT(DISTINCT str(?instance); separator="; ") AS ?instances)
+  (GROUP_CONCAT(DISTINCT ?instanceTitle) AS ?its)
+  (GROUP_CONCAT(DISTINCT str(?electronicLocator); separator="; ") AS ?eLocators)
+  (GROUP_CONCAT(DISTINCT str(?collection); separator=";") AS ?collections)
+
+  (GROUP_CONCAT(DISTINCt CONCAT(str(?role), "|", str(?label)); separator=";") AS ?_create_contributions)
+
+#(GROUP_CONCAT(DISTINCT str(?genre); separator=";") AS ?genres)
+# (GROUP_CONCAT(DISTINCT str(?location); separator=";") AS ?locations)
+#  (GROUP_CONCAT(DISTINCT str(?subject); separator=";") AS ?subjects)
+WHERE {
+    VALUES (?role ?pred) {
+      ("genre" cmo:hasGenre)
+      ("location" cmo:depictsLocation)
+      ("topic" cmo:hasSubject)
+    }
+    ?work
+      a bf:Work ; #, ?workType ;
+      cmo:hasUUID ?uuid ;
+      bf:hasInstance ?instance ;
+      bf:title/bf:mainTitle ?workTitle ;
+    # pred
+      ?pred ?contentAnalysis ;
+      # For the work, we need to get the items. These are the electronic locations
+      bf:adminMetadata ?s .
+
+    ?contentAnalysis
+      skos:prefLabel ?label .
+    #?workType
+    #  rdfs:subClassOf bf:Work ;
+    #.
+    ?instance
+      bf:title/bf:mainTitle ?instanceTitle ;
+    #bf:hasItem ?item ;
+    .
+  #OPTIONAL {
+  #i#    ?work
+
+  #}
+    # The items have the electronic location items
+    # Not every item has an electronic locator
+    #OPTIONAL {
+  #  ?instance
+    #    bf:hasItem ?item .
+    #  ?item
+  #    bf:electronicLocator ?electronicLocator ;
+  #      .
+    #  }
+
+    #OPTIONAL {
+    #  ?work
+  #  ?agentUri
+    #    bf:contribution/bf:agent ?agentUri .
+    #    a cmo:Collection ;
+  #    skos:prefLabel ?collection ;
+  #    .
+    #}
+
+  #?work
+  #    ?pred ?item .
+
+#    OPTIONAL {
+#      ?work
+#        cmo:hasGenre/skos:prefLabel  ?genre ;
+#        .
+#    }
+#    OPTIONAL {
+#      ?work
+#        cmo:depictsLocation/skos:prefLabel ?location ;
+#        .
+#    }
+#    OPTIONAL {
+#      ?work
+#        cmo:hasSubject/skos:prefLabel ?subject ;
+#        .
+#    }
+#
+
+    # The work type makes sure these aren't bare works, but works
+    # That are the basis for the resources.
+#    ?workType
+#      rdfs:subClassOf bf:Work .
+#    OPTIONAL {
+#      ?work
+#        bf:contribution ?creationNode ;
+#        .
+#      ?creationNode
+#        a bf:PrimaryContribution ;
+#        bf:agent ?creatorUri ;
+#      .
+#      ?creatorUri
+#        a cmo:Agent ;
+#        skos:prefLabel ?creator ;
+#      .
+#    }
+#
+#   #both Jena and oxigraph would prefer this to be an optional and not a union. But rdflib expects this.
+#    #{
+#    # SELECT ?work (CONCAT(str(?role), "|", REPLACE(?agent, ";", ",")) AS ?contribution)
+#    # WHERE {
+#    OPTIONAL {
+#        ?work
+#          a bf:Work ;
+#          bf:contribution ?contributionNode ;
+#        .
+#        ?contributionNode
+#          bf:agent ?agentUri ;
+#          bf:role/(skos:prefLabel|rdfs:label) ?role ;
+#        .
+#          ?agentUri
+#          a cmo:Agent ;
+#          skos:prefLabel ?agent ;
+  #        .
+  #      #VALUES ?roleLabel {
+  #      #  skos:prefLabel
+  #      #  rdfs:label
+  #        #}
+  #      #?roleNode ?roleLabel ?role .
+  #
+  #        #OPTIONAL {
+  #      #?roleNode rdfs:label ?labeledRole .
+  #      #  FILTER(isBlank(?roleNode))
+  #      #}
+  #      #BIND(IF( BOUND(?labeledRole), ?labeledRole, str(?roleNode)) AS ?role)
+      #    }
+    #  }
+  #  }
+}
+GROUP BY ?uuid
+#GROUP BY ?work
+ORDER BY ?works
+

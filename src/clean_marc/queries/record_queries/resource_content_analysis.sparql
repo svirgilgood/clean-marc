@@ -1,0 +1,92 @@
+# Grab all of the resources or the works
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX bflc: <http://id.loc.gov/ontologies/bflc/>
+PREFIX cc: <http://creativecommons.org/ns#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX madsrdf: <http://www.loc.gov/mads/rdf/v1#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX xs: <http://www.w3.org/2001/XMLSchema#>
+PREFIX cmo: <http://svirgilgood.github.io/clean_marc/onto/>
+
+
+
+##############################################################################################################################################################
+#
+#
+#
+##############################################################################################################################################################
+
+SELECT
+  ?uuid
+  (GROUP_CONCAT(DISTINCT ?work; separator=";") AS ?works)
+  (SAMPLE(?workTitle) AS ?wt)
+  (GROUP_CONCAT(DISTINCT str(?instance); separator="; ") AS ?instances)
+  (GROUP_CONCAT(DISTINCT ?instanceTitle) AS ?its)
+  (GROUP_CONCAT(DISTINCT str(?electronicLocator); separator="; ") AS ?eLocators)
+  (GROUP_CONCAT(DISTINCT str(?collection); separator=";") AS ?collections)
+
+#(GROUP_CONCAT(DISTINCt CONCAT(str(?role), "|", str(?label)); separator=";") AS ?_create_contributions)
+
+(GROUP_CONCAT(DISTINCT str(?genre); separator=";") AS ?genres)
+ (GROUP_CONCAT(DISTINCT str(?location); separator=";") AS ?locations)
+  (GROUP_CONCAT(DISTINCT str(?subject); separator=";") AS ?subjects)
+WHERE {
+  {
+
+    ?work
+      a bf:Work ; #, ?workType ;
+      cmo:hasUUID ?uuid ;
+      bf:hasInstance ?instance ;
+      bf:title/bf:mainTitle ?workTitle ;
+    # pred
+      # For the work, we need to get the items. These are the electronic locations
+      bf:adminMetadata ?s .
+
+    ?contentAnalysis
+      skos:prefLabel ?label .
+    #?workType
+    #  rdfs:subClassOf bf:Work ;
+    #.
+    ?instance
+      bf:title/bf:mainTitle ?instanceTitle ;
+    #bf:hasItem ?item ;
+    .
+  } UNION {
+    ?work
+      cmo:hasUUID ?uuid ;
+      cmo:hasGenre/skos:prefLabel ?genre ;
+    .
+
+
+  } UNION {
+    ?work
+      cmo:hasUUID ?uuid ;
+    cmo:depictsLocation ?location ;
+      .
+  } UNION {
+    ?work
+      cmo:hasUUID ?uuid ;
+      cmo:hasSubjct ?subject ;
+    .
+  } UNION {
+    ?work
+        cmo:hasUUID ?uuid ;
+        bf:contribution/bf:agent ?agentUri ;
+    .
+
+    ?agentUri
+        a cmo:Collection ;
+        skos:prefLabel ?collection ;
+    .
+  }
+
+}
+GROUP BY ?uuid
+#GROUP BY ?work
+ORDER BY ?works
+

@@ -1,0 +1,49 @@
+# Grab all of the resources or the works
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX bflc: <http://id.loc.gov/ontologies/bflc/>
+PREFIX cc: <http://creativecommons.org/ns#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX madsrdf: <http://www.loc.gov/mads/rdf/v1#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX xs: <http://www.w3.org/2001/XMLSchema#>
+PREFIX cmo: <http://svirgilgood.github.io/clean_marc/onto/>
+
+#(CONCAT(?role, "::", ?agent) AS ?ccontributor)
+#(GROUP_CONCAT(DISTINCT str(?creator); separator="; ") AS ?creators)
+SELECT
+  ?work
+  ?agent
+  ?role
+WHERE {
+    ?work
+      a bf:Work ;
+      bf:contribution ?contributionNode ;
+      .
+
+
+    ?contributionNode
+      a bf:Contribution ;
+      bf:agent ?agentUri ;
+    #bf:role/(skos:prefLabel|rdfs:label) ?role ;
+      bf:role ?roleNode ;
+    .
+    ?agentUri
+      a cmo:Agent ;
+      skos:prefLabel ?agent ;
+    .
+    ?roleNode
+      rdfs:label ?role ;
+    .
+    VALUES ?labelPredicate {
+      skos:prefLabel
+      rdfs:label
+    }
+}
+
+#GROUP BY ?work
+#ORDER BY ?work

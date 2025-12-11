@@ -1,0 +1,44 @@
+# Grab all of the resources or the works
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX bflc: <http://id.loc.gov/ontologies/bflc/>
+PREFIX cc: <http://creativecommons.org/ns#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX madsrdf: <http://www.loc.gov/mads/rdf/v1#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX xs: <http://www.w3.org/2001/XMLSchema#>
+PREFIX cmo: <http://svirgilgood.github.io/clean_marc/onto/>
+
+SELECT
+  ?uuid
+  (GROUP_CONCAT(DISTINCT STR(?work); separator=";") AS ?works)
+  (GROUP_CONCAT(DISTINCT str(?collection); separator=";") AS ?collections)
+#(GROUP_CONCAT(DISTINCT str(?collection); separator=";") AS ?collections)
+
+WHERE {
+    ?work
+      a bf:Work, ?workType ;
+      cmo:hasUUID ?uuid ;
+      bf:contribution ?contributionNode ;
+    #bf:contribution ?contributionNode ;
+    .
+    # The work type makes sure these aren't bare works, but works
+    # That are the basis for the resources.
+    ?workType
+      rdfs:subClassOf bf:Work .
+
+    ?contributionNode
+      bf:agent ?agentUri ;
+    .
+    ?agentUri
+      a cmo:Agent, cmo:Collection ; #, ?agentType ;
+
+      skos:prefLabel ?collection ;
+      .
+}
+GROUP BY ?uuid
+ORDER BY ?works
