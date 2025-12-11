@@ -12,12 +12,6 @@ def collect_queries(dir=QuerDir.ITEM) -> List[Dict[str, str]]:
     queries
     """
 
-    match dir:
-        case QuerDir.ITEM:
-            query_dir = base_dir / "item_queries"
-        case QuerDir.RECORD:
-            query_dir = base_dir / "record_queries"
-
     queries: List[Dict[str, str]] = []
     for query in (base_dir / dir.value).glob("*.rq"):
         basename = query.stem
