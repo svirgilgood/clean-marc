@@ -10,8 +10,8 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
 
-SELECT 
-  ?placeLabel 
+SELECT
+  ?placeLabel
 (GROUP_CONCAT(str(?place)) AS ?pps)
 (GROUP_CONCAT(DISTINCT str(?scheme); separator="; ") AS ?belongsToScheme)
   (GROUP_CONCAT(DISTINCT str(?externalID); separator="; ") AS ?externalIDs)
@@ -38,7 +38,7 @@ WHERE {
       rdfs:label
     }
 
-    ?place 
+    ?place
       a bf:Place ;
       madsrdf:isMemberOfMADSScheme ?scheme ;
       ?labelPred ?placeLabel ;
@@ -48,8 +48,8 @@ WHERE {
       madsrdf:authoritativeLabel
       rdfs:label
     }
- 
-    ?place 
+
+    ?place
       a bf:Place ;
       madsrdf:isIdentifiedByAuthority ?externalID ;
       rdfs:label ?placeLabel ;
@@ -61,5 +61,5 @@ WHERE {
   }
 }
 GROUP BY ?placeLabel
-ORDER BY ?placeLabel  
+ORDER BY ?placeLabel
 
