@@ -33,7 +33,8 @@ dependencies = [
   "requests==2.32.3",
   "openpyxl==3.1.5",
   "owlrl==7.1.3",
-  "reasonable==0.2.6"
+  "reasonable==0.2.6",
+  "pysparql-anything==1.0.0.0"
 ]
 
 [project.urls]
@@ -42,7 +43,7 @@ Issues = "https://github.com/svirgilgood/clean-marc/issues"
 Source = "https://github.com/svirgilgood/clean-marc"
 
 [project.scripts]
-clean_marc = "clean_marc.cli:cli"
+clean-marc = "clean_marc.cli:cli"
 
 [tool.hatch.version]
 path = "src/clean_marc/__about__.py"
