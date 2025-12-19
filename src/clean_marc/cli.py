@@ -15,6 +15,7 @@ from .queries.queries import collect_queries
 from .utils import cleaning_functions, QuerDir  # , cleaning_closures
 from .conversions.update_graph import pre_reasoner_scripts, post_reasoner_scripts
 from .reasoner.reasoner import instantiate_inferred_triples as reasoner
+from .anything.spanything import QueryObj, AnythingQuer, spanything
 
 
 # this is the bibframe model
@@ -100,7 +101,8 @@ def create_oclc_list(
 def query_filter(filter_criteria: List[str], queries: List[Dict[str, str]]):
     """
     Filter Queries based on the list of queries and partial names that match.
-    This is used to only run certain queries that are being debugged or updated.
+    This is used to only run certain queries that are being debugged or
+    updated.
     """
     return [x for x in queries if x["query_name"] in filter_criteria]
 
@@ -132,7 +134,17 @@ def create_records(
     return
 
 
-def create_worldcat_records(args: argparse.Namespace, oclc_numbers: List[str], oclc2uuid: Dict[str, List[str]], graph: Graph):
+def create_worldcat_records(
+        args: argparse.Namespace,
+        oclc_numbers: List[str],
+        oclc2uuid: Dict[str, List[str]],
+        graph: Graph
+):
+    """
+    Find the oclc numbers from a dataframe.
+    If no worldcat dataframe is provided, an empty dataframe will
+    be created and returned.
+    """
     if args.worldcat:
         worldcat_df = read_worldcat_items(args.worldcat)
         if args.oclc_numbers:
@@ -182,49 +194,20 @@ def cli():
     functions.
     """
     parser = argparse.ArgumentParser(epilog="""The commands are intended to be
-    run in the following order:
+    run in the following order: 1. init; 2. sparql-anything; 3. records""")
+    subparser = parser.add_subparsers(
+        dest="command",
+        description="subcommands",
+        help="""find out more about each of the subcommands by passing
+        -h/--help flag to them""")
 
-    1. init: This command runs the initial import of the xml or worldcat oclc
+    init_parser = subparser.add_parser("init", help="""
+   1. init: This command runs the initial import of the xml or worldcat oclc
         numbers creates a bibframe turtle file that has some additional
         cleaning and initial step and creates some inference for new classes,
         and generates the associated data for import. (Agents, Locations,
         Topics).
-
-    2. sparql-anything: After the Initial values and items are exported to
-        spreadsheets, they need to be cleaned and reconciled in OpenRefine,
-        sparql-anything can run commands to re-integrate the cleaned data into
-        the bibframe turtle file for the final export.
-
-    3. records: This produces the final export of the record items to be
-       imported. These are the main records for the items (either resources or
-       bibliographic records) which link to the values and have the import
-       metadata from the bibliographic records.
     """)
-    subparser = parser.add_subparsers(
-        dest="command",
-        description="subcommands",
-        help="""The init subcommand """)
-
-    records_parser = subparser.add_parser("records")
-
-    records_parser.add_argument(
-        'ttl',
-        nargs="+",
-        help="Add the turtle file to run the item queries against"
-    )
-
-    records_parser.add_argument(
-        "-q",
-        "--query",
-        nargs="?",
-        help="""Optionally select query or queries to run, not all of the
-        queries in the script""",
-    )
-    sparql_parser = subparser.add_parser("sparql-anything")
-
-    sparql_parser.add_argument("sparql", help="run sparql anything files")
-
-    init_parser = subparser.add_parser("init")
 
     init_parser.add_argument(
         "marc_files",
@@ -286,6 +269,60 @@ def cli():
         help="""skip the inferencing step. Inferencing can take some time, this
         skips the inferencing step""",
     )
+    sparql_parser = subparser.add_parser("sparql-anything", help="""2.
+    sparql-anything subcommand takes arguments based on the agents, places,
+    or topics that were created by the init command. The output is a set of
+    turtle files that can then be added to the data sources for the records
+    subcommand that can be integrated into how the records and bibliography
+    are created.
+    """)
+
+    # sparql_parser.add_argument("sparql", help="run sparql anything files")
+    sparql_parser.add_argument(
+        "-a",
+        "--agent",
+        nargs="?",
+        help="point to the file that contains a cleaned agent list")
+    sparql_parser.add_argument(
+        "-p",
+        "--place",
+        nargs="?",
+        help="point to the file that contains a cleaned place list")
+    sparql_parser.add_argument(
+        "-t",
+        "--topic",
+        nargs="?",
+        help="point to the cleaned topics list")
+    sparql_parser.add_argument(
+        "-d",
+        "--dir",
+        nargs="?",
+        help="""specify the directory to save the output files to, if no
+        argument is specified, the default current working directory will be
+        used""",
+    )
+
+    records_parser = subparser.add_parser("records", help="""
+    3. records: This produces the final export of the record items to be
+       imported. These are the main records for the items (either resources or
+       bibliographic records) which link to the values and have the import
+       metadata from the bibliographic records.
+
+    """)
+
+    records_parser.add_argument(
+        'ttl',
+        nargs="+",
+        help="Add the turtle file to run the item queries against"
+    )
+
+    records_parser.add_argument(
+        "-q",
+        "--query",
+        nargs="?",
+        help="""Optionally select query or queries to run, not all of the
+        queries in the script""",
+    )
 
     args = parser.parse_args()
 
@@ -298,6 +335,26 @@ def cli():
         return
 
     if args.command == "sparql-anything":
+        dir = Path(args.dir) if args.dir else Path(".")
+        dir.mkdir(parents=True, exist_ok=True)
+        query_list: List[QueryObj] = []
+        for arg in vars(args):
+            if not getattr(args, arg):
+                continue
+            match arg:
+                case "agent": query_list.append(
+                    QueryObj(AnythingQuer.AGENT, Path(args.agent))
+                )
+                case "place": query_list.append(
+                    QueryObj(AnythingQuer.PLACE, Path(args.place))
+                )
+                case "topic": query_list.append(
+                    QueryObj(AnythingQuer.TOPIC, Path(args.topic))
+                )
+                case _:
+                    print(f"Argument {arg} is not a sparql-anything query")
+        spanything(query_list, dir)
+
         print("Sparql Anything Called")
         return
 
