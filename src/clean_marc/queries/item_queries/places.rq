@@ -11,55 +11,66 @@ PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
 
 SELECT
-  ?placeLabel
-(GROUP_CONCAT(str(?place)) AS ?pps)
-(GROUP_CONCAT(DISTINCT str(?scheme); separator="; ") AS ?belongsToScheme)
+  (?prefLabel AS ?altLabel)
+  ?prefLabel
+  (GROUP_CONCAT(str(?place)) AS ?pps)
+  (GROUP_CONCAT(DISTINCT str(?subject); separator=";") AS ?subjectFor)
+  (GROUP_CONCAT(DISTINCT str(?pubLocation); separator=";") AS ?publocationsFor)
   (GROUP_CONCAT(DISTINCT str(?externalID); separator="; ") AS ?externalIDs)
-#(GROUP_CONCAT(str(); separator="; ") AS )
 WHERE {
   {
     VALUES ?labelPred {
       madsrdf:authoritativeLabel
       rdfs:label
     }
-    ?place
-      a bf:Place ;
-      ?labelPred ?placeLabel ;
-      .
-      FILTER NOT EXISTS {
-        ?place madsrdf:isIdentifiedByAuthority ?externalID .
-      }
-      FILTER NOT EXISTS {
-        ?place madsrdf:isMemberOfMADSScheme ?scheme .
-      }
-  } UNION {
-    VALUES ?labelPred {
-      madsrdf:authoritativeLabel
-      rdfs:label
-    }
+    ?pubLocation
+      (bf:capture/bf:place)|bf:originPlace ?place ;
+    .
 
     ?place
       a bf:Place ;
-      madsrdf:isMemberOfMADSScheme ?scheme ;
-      ?labelPred ?placeLabel ;
+      ?labelPred ?prefLabel ;
       .
+
   } UNION {
-    VALUES ?labelPred {
-      madsrdf:authoritativeLabel
-      rdfs:label
+    ?pubLocation
+      bf:provisionActivity ?provActivity ;
+    .
+    ?provActivity
+      bflc:simplePlace|bflc:place ?prefLabel ;
+    .
+
+  } UNION {
+    ?subject
+      bf:subject ?topic ;
+    .
+
+    ?topic
+      madsrdf:componentList/(rdf:rest*|rdf:first)* ?topicTerm ;
+    .
+
+    ?topicTerm
+      a madsrdf:Geographic ;
+      madsrdf:authoritativeLabel|rdfs:value ?prefLabel ;
+    .
+
+    FILTER NOT EXISTS {
+      ?topic
+        bf:source ?externalSchemas ;
+      .
+      VALUES ?externalSchemas {
+        <http://id.loc.gov/vocabulary/subjectSchemes/gnd>
+        <http://id.loc.gov/vocabulary/subjectSchemes/rvm>
+      }
+    }
+    FILTER NOT EXISTS {
+      ?topicTerm
+        a bf:Hub ;
+        .
     }
 
-    ?place
-      a bf:Place ;
-      madsrdf:isIdentifiedByAuthority ?externalID ;
-      rdfs:label ?placeLabel ;
-    #  ?labelPred ?placeLabel ;
-     .
-      OPTIONAL {
-        ?place madsrdf:isMemberOfMADSScheme ?scheme .
-      }
   }
 }
-GROUP BY ?placeLabel
-ORDER BY ?placeLabel
+GROUP BY ?prefLabel
+ORDER BY ?prefLabel
 
