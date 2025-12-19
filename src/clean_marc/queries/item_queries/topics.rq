@@ -7,7 +7,8 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
 
 SELECT
-  ?label
+  (?prefLabel AS ?altLabel)
+  ?prefLabel
   (GROUP_CONCAT(DISTINCT ?type; separator=";") AS ?_simplify_types)
   (GROUP_CONCAT(DISTINCT str(?scheme); separator=";") AS ?schemes)
   (GROUP_CONCAT(DISTINCT str(?externalID); separator=";") AS ?extID)
@@ -23,11 +24,21 @@ WHERE {
       madsrdf:componentList/(rdf:rest*|rdf:first)* ?topicTerm ;
     .
 
+      #FILTER NOT EXISTS {
+      #?topic
+    #  bf:source <http://id.loc.gov/vocabulary/subjectSchemes/rvm> ;
+    #  .
+    #}
     FILTER NOT EXISTS {
       ?topic
-        bf:source <http://id.loc.gov/vocabulary/subjectSchemes/rvm> ;
+        bf:source ?externalSchemas ;
       .
+      VALUES ?externalSchemas {
+        <http://id.loc.gov/vocabulary/subjectSchemes/gnd>
+        <http://id.loc.gov/vocabulary/subjectSchemes/rvm>
+      }
     }
+
     FILTER NOT EXISTS {
       ?topicTerm
         a bf:Hub ;
@@ -54,9 +65,12 @@ WHERE {
         .
     }
     ?topicTerm
-      madsrdf:authoritativeLabel ?label ;
+      madsrdf:authoritativeLabel ?prefLabel ;
       rdf:type ?termType ;
     .
+    # FILTER OUT The Geographic Subjects, they should be added to
+    # the Places
+    FILTER(?termType != madsrdf:Geographic)
     BIND(str(?termType) AS ?type)
     BIND(IF(STRSTARTS(str(?topic), "http://example.org/") || isBlank(?topicTerm), "", ?topicTerm) AS ?externalID)
   } UNION {
@@ -72,10 +86,19 @@ WHERE {
       .
 
     }
-    FILTER NOT EXISTS {
+    #FILTER NOT EXISTS {
+    #?topic
+        #    bf:source <http://id.loc.gov/vocabulary/subjectSchemes/rvm> ;
+    #  .
+    #}
+FILTER NOT EXISTS {
       ?topic
-        bf:source <http://id.loc.gov/vocabulary/subjectSchemes/rvm> ;
+        bf:source ?externalSchemas ;
       .
+      VALUES ?externalSchemas {
+        <http://id.loc.gov/vocabulary/subjectSchemes/gnd>
+        <http://id.loc.gov/vocabulary/subjectSchemes/rvm>
+      }
     }
     FILTER NOT EXISTS {
       ?topic
@@ -89,7 +112,7 @@ WHERE {
     }
     ?topic
       rdf:type ?termType ;
-      madsrdf:authoritativeLabel ?label ;
+      madsrdf:authoritativeLabel ?prefLabel ;
     .
     OPTIONAL {
       ?topic
@@ -101,6 +124,10 @@ WHERE {
         bf:source ?scheme ;
       .
     }
+
+    # FILTER OUT The Geographic Subjects, they should be added to
+    # the Places
+    FILTER(?termType != madsrdf:Geographic)
     BIND(str(?termType) AS ?type)
 
     BIND(IF(STRSTARTS(str(?topic), str("http://example.org/")) || isBlank(?topic), "", ?topic) AS ?externalID)
@@ -118,5 +145,5 @@ WHERE {
   #}
 
 }
-GROUP BY ?label
-ORDER BY ?label
+GROUP BY ?prefLabel
+ORDER BY ?prefLabel
