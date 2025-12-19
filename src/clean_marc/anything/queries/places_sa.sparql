@@ -1,0 +1,46 @@
+PREFIX xyz: <http://sparql.xyz/facade-x/data/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX fx: <http://sparql.xyz/facade-x/ns/>
+PREFIX apf:  <http://jena.apache.org/ARQ/property#>
+PREFIX ex: <https://example.org/data/>
+PREFIX cmo: <http://svirgilgood.github.io/clean_marc/onto/>
+PREFIX cmd: <http://svirgilgood.github.io/clean_marc/data/>
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+
+CONSTRUCT {
+  ?work
+    cmo:location ?term ;
+  .
+  ?instance
+    cmo:hasPublicationLocation ?term ;
+  .
+
+  ?term
+    a ?type ;
+    skos:prefLabel ?prefLabel ;
+    skos:altLabel ?altLabel ;
+    .
+
+}
+WHERE {
+  SERVICE <x-sparql-anything:file://${spreadsheet},spreadsheet.headers=true>
+  {
+      ?s
+        xyz:prefLabel ?prefLabel ;
+        xyz:altLabel ?altLabel ;
+        xyz:externalIDs ?extId ;
+        xyz:subjectFor ?workStr ;
+        xyz:publocationsFor ?instanceStr ;
+      .
+
+  }
+  BIND(IRI(CONCAT(str(cmo:), "_Geographic_", SUBSTR(fx:DigestUtils.sha384Hex (?prefLabel), 1, 18))) AS ?term)
+
+    #BIND(IRI(CONCAT( STR(cmd:), "_", ?types, "_", SUBSTR(fx:DigestUtils.sha384Hex (?label), 1, 18))) AS ?term)
+  ?instanceUri apf:strSplit (?instanceStr "\\|")
+  BIND(IRI(?instanceUri) AS ?instance)
+  ?workUri apf:strSplit (?workStr "\\|")
+  BIND(IRI(?workUri) AS ?work)
+}

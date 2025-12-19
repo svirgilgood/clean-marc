@@ -1,0 +1,54 @@
+PREFIX xyz: <http://sparql.xyz/facade-x/data/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX fx: <http://sparql.xyz/facade-x/ns/>
+PREFIX apf:  <http://jena.apache.org/ARQ/property#>
+PREFIX ex: <https://example.org/data/>
+PREFIX cmo: <http://svirgilgood.github.io/clean_marc/onto/>
+PREFIX cmd: <http://svirgilgood.github.io/clean_marc/data/>
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+CONSTRUCT {
+  ?agentURI
+    a ?rdfClass ;
+    rdfs:label ?label ;
+    skos:prefLabel ?prefLabel ;
+    cmo:hasDeath ?death ;
+    cmo:hasBirth ?birth ;
+    .
+}
+WHERE {
+  SERVICE <x-sparql-anything:file://${spreadsheet},spreadsheet.headers=true> {
+    ?s
+      xyz:agent ?agent ;
+      xyz:label ?label ;
+      #xyz:Reconcile ?reconcile ;
+      xyz:01-Name ?name ;
+      xyz:03a-Birth ?birth ;
+      xyz:03b-Death ?death ;
+      #xyz:types "Person" .
+      xyz:types ?type .
+
+    BIND(
+      COALESCE(
+        IF(?type = "Person", cmo:Person , 1/0),
+        IF(?type = "Organization", cmo:Organization, 1/0),
+        IF(?type = "Meeting", cmo:Meeting, 1/0),
+        IF(?type = "Collection", cmo:Collection, 1/0),
+        IF(?type = "ManuscriptResource", cmo:ManuscriptResource, 1/0),
+        xyz:NotFound
+
+      ) AS ?rdfClass
+    )
+    BIND(
+      COALESCE(
+        IF(?reconcile != "", ?reconcile, 1/0),
+        IF(?type IN ("Collection" , "Organization"), ?label, 1/0),
+        ?name
+      ) AS ?prefLabel
+    )
+
+    BIND(IRI(?agent) as ?agentURI)
+  }
+}

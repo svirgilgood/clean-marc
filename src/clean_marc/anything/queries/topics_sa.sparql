@@ -1,0 +1,66 @@
+PREFIX xyz: <http://sparql.xyz/facade-x/data/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX fx: <http://sparql.xyz/facade-x/ns/>
+PREFIX apf:  <http://jena.apache.org/ARQ/property#>
+PREFIX ex: <https://example.org/data/>
+PREFIX cmo: <http://svirgilgood.github.io/clean_marc/onto/>
+PREFIX cmd: <http://svirgilgood.github.io/clean_marc/data/>
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+
+CONSTRUCT {
+  ?work
+    a bf:Work ;
+    ?prop ?term ;
+  #ex:ogValue ?oclcNumbers .
+  .
+  ?term
+    a ?type ;
+    skos:prefLabel ?label ;
+    .
+
+}
+WHERE {
+  SERVICE <x-sparql-anything:file://${spreadsheet},spreadsheet.headers=true>
+  {
+    ?s
+      xyz:extID       ?extID ;
+      xyz:label       ?label ;
+        #xyz:rec2        ?rec2  ;
+        #xyz:Reconcile   ?reconcile  ;
+      xyz:subjectFor  ?oclcNumbers ;
+      xyz:types       ?types ;
+      #xyz:uuid        "14347193-1718-4dd4-a4ce-613da9460137"
+    .
+        #BIND(
+      # COALESCE(
+      #  IF(?rec2 != "", ?rec2, 1/0),
+      #  IF(?reconcile != "", ?reconcile, 1/0),
+      #  ?ogLabel
+      #)
+      #AS ?label
+      #)
+
+
+    BIND(
+      COALESCE(
+        IF(?types = "Geographic", cmo:depictsLocation, 1/0),
+        IF(?types = "GenreForm", cmo:hasGenre, 1/0),
+        IF(?types = "Topic", cmo:hasSubject, 1/0),
+        IF(?types = "Temporal", cmo:hasDateRange, 1/0),
+        ex:undefined
+      )
+      AS ?prop
+    )
+    BIND(
+      IRI(CONCAT(str(cmo:), ?types))
+      AS ?type
+    )
+    BIND(IRI(CONCAT( STR(cmd:), "_", ?types, "_", SUBSTR(fx:DigestUtils.sha384Hex (?label), 1, 18))) AS ?term)
+
+
+  }
+  ?oclcNum apf:strSplit (?oclcNumbers "\\|")
+  BIND(IRI(CONCAT("http://example.org/", str(?oclcNum), "#Work")) AS ?work)
+}
