@@ -70,7 +70,8 @@ WHERE {
     .
     # FILTER OUT The Geographic Subjects, they should be added to
     # the Places
-    FILTER(?termType != madsrdf:Geographic)
+    #FILTER(?termType != madsrdf:Geographic)
+    FILTER(?termType NOT IN (madsrdf:Geographic, bf:Place))
     BIND(str(?termType) AS ?type)
     BIND(IF(STRSTARTS(str(?topic), "http://example.org/") || isBlank(?topicTerm), "", ?topicTerm) AS ?externalID)
   } UNION {
@@ -91,7 +92,7 @@ WHERE {
         #    bf:source <http://id.loc.gov/vocabulary/subjectSchemes/rvm> ;
     #  .
     #}
-FILTER NOT EXISTS {
+    FILTER NOT EXISTS {
       ?topic
         bf:source ?externalSchemas ;
       .
@@ -127,7 +128,8 @@ FILTER NOT EXISTS {
 
     # FILTER OUT The Geographic Subjects, they should be added to
     # the Places
-    FILTER(?termType != madsrdf:Geographic)
+    #FILTER(?termType != madsrdf:Geographic)
+    FILTER(?termType NOT IN (madsrdf:Geographic, bf:Place))
     BIND(str(?termType) AS ?type)
 
     BIND(IF(STRSTARTS(str(?topic), str("http://example.org/")) || isBlank(?topic), "", ?topic) AS ?externalID)

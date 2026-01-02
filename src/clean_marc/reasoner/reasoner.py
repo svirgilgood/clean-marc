@@ -2,7 +2,7 @@ import owlrl
 import time
 import reasonable
 
-from rdflib import Graph, URIRef, BNode, RDF, Literal, OWL
+from rdflib import Graph
 
 
 def run_owlrl(graph: Graph) -> Graph:

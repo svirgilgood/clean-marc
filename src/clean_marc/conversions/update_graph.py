@@ -88,7 +88,7 @@ def clean_agents(graph: Graph) -> Graph:
         label = agent_row.label
         agent_iri = create_data_iri(label)
         agent_graph.add((agent_iri, RDF.type, CMO.Agent))
-        # work_iris = [URIRef(iri) for iri in agent_row.workUris.split(";")]
+        work_iris = [URIRef(iri) for iri in agent_row.workUris.split(";")]
 
         for original_iri in agent_row.ari.split(";"):
             agent_graph.add(
@@ -127,6 +127,8 @@ def clean_agents(graph: Graph) -> Graph:
         agent_graph.add((bnode, CMO.secondIndicator, Literal(
             agent_row.secondIndicator, datatype=XSD.string)))
         agent_graph.add((bnode, RDF.value, Literal(agent_row.marcKey)))
+        for work_iri in work_iris:
+            agent_graph.add((bnode, CMO.relatedToWork, work_iri))
         value_dict = return_value_dict(
             agent_row.marcfield.strip(), agent_row.marcKey)
         if not value_dict:
