@@ -14,7 +14,8 @@ PREFIX cmd: <http://svirgilgood.github.io/clean_marc/data/>
 PREFIX cmt: <http://svirgilgood.github.io/clean_marc/taxonomy/>
 
 INSERT {
-  ?s ?p ?agent .
+  ?s ?p ?agent ;
+    ?subject ?agent .
 }
 WHERE {
   ?agent
@@ -22,4 +23,8 @@ WHERE {
     rdfs:seeAlso ?oldAgent .
   ?s ?p ?oldAgent .
   FILTER(?p != rdfs:seeAlso)
+  OPTIONAL {
+    ?s bf:subject ?oldAgent .
+    BIND(cmo:hasSubject AS ?subject)
+  }
 }

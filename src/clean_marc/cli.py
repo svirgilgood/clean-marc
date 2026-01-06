@@ -138,7 +138,8 @@ def create_worldcat_records(
         args: argparse.Namespace,
         oclc_numbers: List[str],
         oclc2uuid: Dict[str, List[str]],
-        graph: Graph
+        graph: Graph,
+        dir=Path(".")
 ):
     """
     Find the oclc numbers from a dataframe.
@@ -289,8 +290,8 @@ def cli():
         nargs="?",
         help="point to the file that contains a cleaned place list")
     sparql_parser.add_argument(
-        "-t",
-        "--topic",
+        "-c",
+        "--content-analysis",
         nargs="?",
         help="point to the cleaned topics list")
     sparql_parser.add_argument(
@@ -348,8 +349,9 @@ def cli():
                 case "place": query_list.append(
                     QueryObj(AnythingQuer.PLACE, Path(args.place))
                 )
-                case "topic": query_list.append(
-                    QueryObj(AnythingQuer.TOPIC, Path(args.topic))
+                case "content_analysis": query_list.append(
+                    QueryObj(AnythingQuer.CONTENT_ANALYSIS,
+                             Path(args.content_analysis))
                 )
                 case _:
                     print(f"Argument {arg} is not a sparql-anything query")
@@ -388,7 +390,7 @@ def cli():
         worldcat_df = pd.DataFrame()
     """
     worldcat_df, oclc_numbers, oclc2uuid, graph = create_worldcat_records(
-        args, oclc_numbers, oclc2uuid, graph)
+        args, oclc_numbers, oclc2uuid, graph, dir=dir)
 
     if args.marc_files:
         for marc_file in args.marc_files:
@@ -399,10 +401,10 @@ def cli():
                 marc_tree, graph, separate_works=False)
             marc_records = marc_records + m_records
 
-    if args.save_xml:
-        with open(dir / args.save_xml, "w") as fp:
-            xmlstr = etree.tostring(marc_tree, pretty_print=True)
-            fp.write(xmlstr.decode())
+            if args.save_xml:
+                with open(dir / args.save_xml, "a+") as fp:
+                    xmlstr = etree.tostring(marc_tree, pretty_print=True)
+                    fp.write(xmlstr.decode())
 
     print(f"Number of Marc Records: {marc_records}")
 

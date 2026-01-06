@@ -11,7 +11,7 @@ quer_dir = Path(__file__).parent / "queries"
 class AnythingQuer(Enum):
     AGENT = "agents_sa.sparql"
     PLACE = "places_sa.sparql"
-    TOPIC = "topics_sa.sparql"
+    CONTENT_ANALYSIS = "content_analysis_sa.sparql"
 
 
 @dataclass
