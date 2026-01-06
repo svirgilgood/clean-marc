@@ -1,3 +1,5 @@
+from .anything.spanything import QueryObj, AnythingQuer, spanything
+from .reasoner.reasoner import instantiate_inferred_triples as reasoner
 import argparse
 from rdflib import Graph
 from pathlib import Path
@@ -13,9 +15,8 @@ from .oclc import oclc
 from .xml2rdf import xml2rdf
 from .queries.queries import collect_queries
 from .utils import cleaning_functions, QuerDir  # , cleaning_closures
-from .conversions.update_graph import pre_reasoner_scripts, post_reasoner_scripts
-from .reasoner.reasoner import instantiate_inferred_triples as reasoner
-from .anything.spanything import QueryObj, AnythingQuer, spanything
+from .conversions.update_graph import (
+    pre_reasoner_scripts, post_reasoner_scripts)
 
 
 # this is the bibframe model
@@ -357,7 +358,6 @@ def cli():
                     print(f"Argument {arg} is not a sparql-anything query")
         spanything(query_list, dir)
 
-        print("Sparql Anything Called")
         return
 
     marc_records = 0
@@ -370,25 +370,7 @@ def cli():
 
     oclc_numbers: List[str] = []
     oclc2uuid: Dict[str, List[str]] = {}
-    """
-    if args.worldcat:
-        worldcat_df = read_worldcat_items(args.worldcat)
-        if args.oclc_numbers:
-            oclc_numbers, oclc2uuid = create_oclc_list(
-                worldcat_df, args.oclc_numbers)
-        else:
-            oclc_numbers, oclc2uuid = create_oclc_list(
-                worldcat_df, ["OCLC number (digital)"])
-        marc_tree = oclc.create_marc_collection(oclc_numbers=oclc_numbers)
-        if args.save_xml:
-            with open(dir / args.save_xml, "w") as fp:
-                xmlstr = etree.tostring(marc_tree, pretty_print=True)
-                fp.write(xmlstr.decode())
-        marc_records, graph = xml2rdf.marc2rdf(
-            marc_tree, graph, separate_works=False)
-    else:
-        worldcat_df = pd.DataFrame()
-    """
+
     worldcat_df, oclc_numbers, oclc2uuid, graph = create_worldcat_records(
         args, oclc_numbers, oclc2uuid, graph, dir=dir)
 
