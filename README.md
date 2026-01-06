@@ -41,7 +41,7 @@ pip install -e .
 
 The command works by taking either a MARCXML file as an argument,  or a spread
 sheet that has a column `OCLC number` where the MARCXML can be downloaded from
-the file.
+a file.
 
 ### Configuration
 
@@ -56,20 +56,25 @@ These secrets will be used to authenticate against OCLC to retrieve Marc Records
 ### Basic Usage
 
 ```console
-usage: clean_marc [-h] [-o [OUTPUT]] [-w [WORLDCAT]] [-x [SAVE_XML]] [-q [QUERY]] [--include-closures] [marc_files ...]
-
-positional arguments:
-  marc_files            Marc Files that are to be added to the store and cleaned
+usage: clean-marc [-h] {init,sparql-anything,records} ...
 
 options:
   -h, --help            show this help message and exit
-  -o, --output [OUTPUT]
-                        Set the output file for the converted bibframe.
-  -w, --worldcat [WORLDCAT]
-                        return marc record for oclc numbers. These must have a column 'OCLC number'. The OCLC number column is used to query the worldcat database
-  -x, --save-xml [SAVE_XML]
-                        Where the xml should be store. Primarily used for worldcat records
-  -q, --query [QUERY]   Optionally select query or queries to run, not all of the queries in the script
+
+subcommands:
+  subcommands
+
+  {init,sparql-anything,records}
+                        find out more about each of the subcommands by passing -h/--help flag to them
+    init                1. init: This command runs the initial import of the xml or worldcat oclc numbers creates a bibframe turtle file that has some additional cleaning and initial step and creates some
+                        inference for new classes, and generates the associated data for import. (Agents, Locations, Topics).
+    sparql-anything     2. sparql-anything subcommand takes arguments based on the agents, places, or topics that were created by the init command. The output is a set of turtle files that can then be added to
+                        the data sources for the records subcommand that can be integrated into how the records and bibliography are created.
+    records             3. records: This produces the final export of the record items to be imported. These are the main records for the items (either resources or bibliographic records) which link to the values
+                        and have the import metadata from the bibliographic records.
+
+The commands are intended to be run in the following order: 1. init; 2. sparql-anything; 3. records
+usage: clean_marc [-h] [-o [OUTPUT]] [-w [WORLDCAT]] [-x [SAVE_XML]] [-q [QUERY]] [--include-closures] [marc_files ...]
 ```
 
 ### Downloading from Worldcat
@@ -80,6 +85,10 @@ to the bibliographic resource spreadsheet.
 The `--save-xml` option is helpful for storing the XML file downloaded from
 Worldcat so that a fresh request is not required on every attempt, and to
 verify the output.
+
+To specify the column in the worldcat spreadsheet that has the OCLC numbers, pass
+the column header in with the `-n|--oclc-numbers` flag. The default is "OCLC Number
+(digital)"
 
 ### Extracting from an MARCXML Files
 
