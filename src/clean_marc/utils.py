@@ -213,8 +213,7 @@ def extract_dates_from_names(series: pd.Series, **kwargs) -> pd.Series:
     else:
         for idx, pattern_match in enumerate(DATE_PATTERN.finditer(agent_label)):
             name_heading = "Name" if idx == 0 else f"Name {str(idx).zfill(2)}"
-            date_heading = "Dates" if idx == 0 else f"Dates {
-                str(idx).zfill(2)}"
+            date_heading = "Dates" if idx == 0 else f"Dates {str(idx).zfill(2)}"
 
             name_value = pattern_match.string[:pattern_match.start()].strip()
             # print(f"name value: '{name_value}'")
@@ -428,8 +427,7 @@ def simplify_types(series: pd.Series, **kwargs) -> pd.Series:
         term_type = "Person"
     else:
         if len(term_types) > 1:
-            print(f"\033[93mAdditional Topic Terms: {
-                  '; '.join(term_types)}\033[0m")
+            print(f"\033[93mAdditional Topic Terms: { '; '.join(term_types)}\033[0m")
         term_type = "Topic"
 
     series["types"] = term_type
